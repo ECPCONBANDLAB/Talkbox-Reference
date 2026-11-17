@@ -229,3 +229,12 @@ void TalkBoxReferenceProcessor::setStateInformation(const void* data, int sizeIn
 juce::AudioProcessorEditor* TalkBoxReferenceProcessor::createEditor() {
     return new TalkBoxReferenceEditor(*this);
 }
+
+// ---------------------------------------------------------------------------
+// Entry point required by every JUCE plugin wrapper (VST3, AU, Standalone).
+// Without this symbol the wrappers link against an undefined reference to
+// createPluginFilter() and every target fails at link time.
+// ---------------------------------------------------------------------------
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() {
+    return new TalkBoxReferenceProcessor();
+}
