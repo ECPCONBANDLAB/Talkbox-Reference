@@ -97,22 +97,28 @@ jobs:
               ForEach-Object { Write-Host "::error::$_" }
             exit 1
           }
-          Get-ChildItem packaging\*.exe | Format-Table Name, Length
+          Write-Host "=== installer output ==="
+          if (Test-Path dist) { Get-ChildItem dist | Format-Table Name, Length }
+          Get-ChildItem -Recurse . -Filter TalkBoxReference-Setup-*.exe |
+            ForEach-Object { Write-Host "found: $($_.FullName)" }
 
       - name: Checksum the installer
         shell: pwsh
         run: |
-          $exe = Get-ChildItem packaging\TalkBoxReference-Setup-*.exe | Select-Object -First 1
+          $exe = Get-ChildItem -Recurse . -Filter TalkBoxReference-Setup-*.exe |
+                   Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $exe) { Write-Host "::error::No installer .exe was produced"; exit 1 }
+          Write-Host "checksumming: $($exe.FullName)"
           $hash = (Get-FileHash $exe.FullName -Algorithm SHA256).Hash.ToLower()
-          "$hash  $($exe.Name)" | Out-File -Encoding ascii "packaging\SHA256SUMS-windows.txt"
-          Get-Content "packaging\SHA256SUMS-windows.txt"
+          "$hash  $($exe.Name)" | Out-File -Encoding ascii "dist\SHA256SUMS-windows.txt"
+          Get-Content "dist\SHA256SUMS-windows.txt"
 
       - uses: actions/upload-artifact@v4
         with:
           name: TalkBoxReference-Setup-windows
           path: |
-            packaging/TalkBoxReference-Setup-*.exe
-            packaging/SHA256SUMS-windows.txt
+            dist/TalkBoxReference-Setup-*.exe
+            dist/SHA256SUMS-windows.txt
 
       - name: Attach to release
         if: github.event_name == 'push' || github.event.inputs.publish_release == 'true'
@@ -121,6 +127,6 @@ jobs:
           tag_name: ${{ env.TAG }}
           name: TalkBox Reference ${{ env.TAG }}
           files: |
-            packaging/TalkBoxReference-Setup-*.exe
-            packaging/SHA256SUMS-windows.txt
+            dist/TalkBoxReference-Setup-*.exe
+            dist/SHA256SUMS-windows.txt
           fail_on_unmatched_files: true

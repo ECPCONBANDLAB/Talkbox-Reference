@@ -31,6 +31,7 @@ AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\TalkBox Reference
 DefaultGroupName=TalkBox Reference
+OutputDir=..\dist
 OutputBaseFilename=TalkBoxReference-Setup-{#MyAppVersion}
 Compression=lzma2/max
 SolidCompression=yes
