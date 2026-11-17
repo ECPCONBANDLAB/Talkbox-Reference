@@ -1,20 +1,22 @@
 // TalkBox Reference - Editor.
 //
-// Layout follows the Arturia reference (grouped, framed sections with a header
-// bar), the controls and palette follow the Valhalla reference (large round
-// knobs, value printed under every knob, one amber accent on a dark ground).
+// Layout goals, after user feedback on v1.2.0:
+//   * fewer knobs: six macros replace the wall of single-parameter dials, and
+//     each macro drives a whole group. Every underlying parameter is still
+//     adjustable in the ADVANCED tabs, so nothing is lost.
+//   * not stiff: grouped panels with breathing room, no uniform grid.
+//   * presets that actually differ: a generator with a dice, not static JSON.
 //
-// Every control is bound to a real APVTS parameter, and every parameter the
-// plugin declares is reachable from here. Nothing is decorative.
-//
-// Cost: vector-only drawing, a single 20 Hz timer for the pad, zero allocation
-// per paint. Closing the editor stops all repaints.
+// Structure borrowed from the supplied Arturia reference (centred preset
+// browser with categories on the left), palette and knob style from Valhalla.
 #pragma once
 #include "PluginProcessor.h"
 #include "../ui/TbLookAndFeel.h"
 #include "../ui/TbKnob.h"
+#include "../ui/TbMacroKnob.h"
 #include "../ui/TbControls.h"
 #include "../ui/VowelPad.h"
+#include "../ui/TbDice.h"
 #include <array>
 #include <memory>
 #include <vector>
@@ -33,15 +35,9 @@ public:
 private:
     void timerCallback() override;
     void buildControls();
-    void layoutTab(int tabIndex, juce::Rectangle<int> area);
+    void switchTab(int newTab);
     void drawHeader(juce::Graphics& g, juce::Rectangle<int> r);
     void drawTabBar(juce::Graphics& g, juce::Rectangle<int> r);
-    void switchTab(int newTab);
-
-    // A knob plus a layout slot, so tabs can be laid out declaratively.
-    struct KnobSlot { std::unique_ptr<tbui::Knob> knob; int cx, cy, cw, ch; };
-
-    TalkBoxReferenceProcessor& proc;
 
     juce::AudioParameterChoice* choice(const char* id);
     juce::AudioParameterFloat*  flt(const char* id);
@@ -50,19 +46,32 @@ private:
     tbui::Knob& addKnob(const char* paramId, const juce::String& caption,
                         const juce::String& suffix, int decimals,
                         bool bipolar, int tab);
+    tbui::MacroKnob& addMacro(const juce::String& caption, const juce::String& suffix,
+                              int decimals,
+                              std::vector<tbui::MacroKnob::Target> targets, int tab);
+
+    TalkBoxReferenceProcessor& proc;
 
     VowelPad pad;
-    std::vector<KnobSlot> knobs;
+    std::vector<std::unique_ptr<tbui::Knob>> knobs;
+    std::vector<int> knobTabs;
+    std::vector<std::unique_ptr<tbui::MacroKnob>> macros;
+    std::vector<int> macroTabs;
     std::vector<std::unique_ptr<tbui::Segmented>> segments;
     std::vector<std::unique_ptr<tbui::Toggle>> toggles;
-    std::vector<std::unique_ptr<tbui::Dropdown>> drops;
-    std::vector<std::pair<juce::Component*, int>> tabbed; // component -> tab index
+    std::vector<std::pair<juce::Component*, int>> tabbed;
 
-    juce::TextButton bypassBtn { "BYPASS" }, advBtn { "ADVANCED" };
+    juce::TextButton bypassBtn { "BYPASS" };
+    juce::TextButton advBtn { "ADVANCED" };
+    juce::TextButton diceBtn { "DICE" };
+    juce::TextButton presetPrev { "<" }, presetNext { ">" };
+    juce::Label presetName;
+
     int currentTab = 0;
     int visibleTabCount = 2;
+    int diceRoll = 1;
 
-    juce::Rectangle<int> headerArea, padArea, rightArea, tabBarArea, bodyArea;
+    juce::Rectangle<int> headerArea, tabBarArea, padArea, macroArea, extraArea;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TalkBoxReferenceEditor)
 };

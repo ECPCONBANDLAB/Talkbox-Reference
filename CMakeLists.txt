@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(TalkBoxReference VERSION 1.2.0 LANGUAGES CXX)
+project(TalkBoxReference VERSION 1.3.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -87,7 +87,12 @@ if(TB_BUILD_JUCE)
   )
   target_include_directories(${PROJECT_NAME} PRIVATE src/dsp src/plugin src/ui)
   target_compile_definitions(${PROJECT_NAME} PUBLIC
-    JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0)
+    JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0
+    # Suppress the "Made with JUCE" splash in the Standalone build. JUCE 7 only
+    # enforces the badge under the free Personal tier; this project distributes
+    # under the GPLv3 alternative (see LICENSE-NOTES.md), which does not require
+    # it. If the licence position is ever revisited, remove this line.
+    JUCE_DISPLAY_SPLASH_SCREEN=0)
 
   # Factory presets embedded as BinaryData so the plugin is self-contained.
   # NOTE: juce_add_binary_data() creates its OWN target (<name>) and the header

@@ -18,7 +18,7 @@
 ; LICENCE: this binary links JUCE 7 under the GPLv3. See LICENSE-NOTES.md.
 
 #define MyAppName "TalkBox Reference"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "1.3.0"
 #define MyAppPublisher "TalkBox Reference"
 ; Paths in this script are relative to this file (packaging\), so the
 ; repo-root items are reached with ..\
@@ -38,24 +38,38 @@ SolidCompression=yes
 WizardStyle=modern
 LicenseFile=..\COPYING-GPL-3.0.txt
 ArchitecturesInstallIn64BitMode=x64compatible
+; Let the user choose what to install. Both are selected by default because
+; most people want both, but a user who only mixes inside a DAW can skip the
+; standalone app, and vice versa.
+PrivilegesRequired=admin
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
+[Types]
+Name: "full";       Description: "Everything (VST3 for your DAW + Standalone app)"
+Name: "vst3only";   Description: "VST3 plugin only (for your DAW)"
+Name: "standalone"; Description: "Standalone app only"
+Name: "custom";     Description: "Custom selection"; Flags: iscustom
+
+[Components]
+Name: "vst3";       Description: "VST3 plugin (for FL Studio, Ableton, Reaper, Cubase...)"; Types: full vst3only
+Name: "standalone"; Description: "Standalone app (play without a DAW)";                 Types: full standalone
+
 [Files]
 ; VST3 bundle -> the shared VST3 folder so every DAW sees it
-Source: "{#BuildDir}\VST3\TalkBoxReference.vst3\*"; DestDir: "{autopf}\Common Files\VST3\TalkBoxReference.vst3"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#BuildDir}\VST3\TalkBoxReference.vst3\*"; DestDir: "{autopf}\Common Files\VST3\TalkBoxReference.vst3"; Components: vst3; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Standalone app + its dependencies, into its own program folder
-Source: "{#BuildDir}\Standalone\*"; DestDir: "{autopf}\{#MyAppName}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\presets\factory_presets.json"; DestDir: "{autopf}\{#MyAppName}\presets"; Flags: ignoreversion
+Source: "{#BuildDir}\Standalone\*"; DestDir: "{autopf}\{#MyAppName}"; Components: standalone; Flags: ignoreversion recursesubdirs createallsubdirs
+; Licence files go with whichever component is installed
 Source: "..\COPYING-GPL-3.0.txt"; DestDir: "{autopf}\{#MyAppName}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{autopf}\{#MyAppName}"; DestName: "LICENSE-MIT.txt"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{autopf}\{#MyAppName}\TalkBoxReference.exe"
+Name: "{group}\{#MyAppName}"; Filename: "{autopf}\{#MyAppName}\TalkBoxReference.exe"; Components: standalone
 
 [Run]
-Filename: "{autopf}\{#MyAppName}\TalkBoxReference.exe"; Description: "Launch {#MyAppName}"; Flags: nowait postinstall skipifsilent
+Filename: "{autopf}\{#MyAppName}\TalkBoxReference.exe"; Description: "Launch {#MyAppName}"; Components: standalone; Flags: nowait postinstall skipifsilent
 
 [UninstallRun]
 ; Clean uninstaller prompts Keep presets vs Remove all (see docs/07)

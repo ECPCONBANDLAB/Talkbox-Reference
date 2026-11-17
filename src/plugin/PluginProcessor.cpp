@@ -5,8 +5,12 @@
 TalkBoxReferenceProcessor::TalkBoxReferenceProcessor()
     : AudioProcessor(BusesProperties()
           // Bus 0: stereo carrier in. Bus 1: mono sidechain = talkbox mic.
+          // Bus 0: main stereo insert (carrier audio in).
           .withInput("Input", juce::AudioChannelSet::stereo(), true)
-          .withInput("Sidechain", juce::AudioChannelSet::mono(), true)
+          // Bus 1: OPTIONAL mic/sidechain. Marked non-required: a host that
+          // cannot route a second input (FL Studio's default) then simply
+          // leaves it unconnected instead of silencing the effect.
+          .withInput("Mic / Sidechain", juce::AudioChannelSet::mono(), false)
           .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
       apvts(*this, nullptr, juce::Identifier("TalkBoxReference"), createLayout()) {
     for (auto& a : visF) a.store(500.f);
@@ -47,7 +51,7 @@ TalkBoxReferenceProcessor::createLayout() {
 
     // Header / modes
     addChoice("sourceMode", 0, {"Pad/MIDI", "Live Mic Control"});
-    addChoice("carrierMode", 0, {"External Audio", "Internal Talkbox Synth"});
+    addChoice("carrierMode", 0, {"External Audio", "Internal Talkbox Synth"});  // 0 = audio in
     addChoice("quality", 1, {"Eco", "Balanced", "Studio", "Creative"});
     addBool("bypass", false);
     // Simple macros
@@ -74,6 +78,7 @@ TalkBoxReferenceProcessor::createLayout() {
     addChoice("synthWave", 0, {"Saw", "Pulse"});
     addFloat("synthOctave", 0.f, -2.f, 2.f); addFloat("synthGlide", 0.06f, 0.f, 0.5f);
     addFloat("synthVibrato", 0.f, 0.f, 1.f);
+    addFloat("arpRate", 8.f, 0.5f, 20.f);
     // Advanced: Hardware Chain
     addPct("driverComp", 30.f); addFloat("diaphragmAsym", 0.f, -50.f, 50.f);
     addFloat("hornCut", 6500.f, 4000.f, 9000.f);
@@ -164,6 +169,7 @@ void TalkBoxReferenceProcessor::syncParams() {
     p.micSmooth = pct("micSmooth");
     p.synthWave = (int)getF("synthWave"); p.synthGlide = getF("synthGlide");
     p.synthVibrato = getF("synthVibrato");
+    p.arpRate = getF("arpRate");
     p.driverComp = pct("driverComp"); p.diaphragmAsym = getF("diaphragmAsym") * 0.01f;
     p.hornCut = getF("hornCut");
     p.hoseLength = getF("hoseLength"); p.hoseDamping = pct("hoseDamping");
@@ -228,6 +234,11 @@ void TalkBoxReferenceProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     buffer.clear();
     buffer.copyFrom(0, 0, outL.data(), n);
     if (numOut > 1) buffer.copyFrom(1, 0, outR.data(), n);
+
+    // Did any MIDI ever arrive? An effect insert in most DAWs never sends any,
+    // so Internal-synth mode would be silent with no explanation. The editor
+    // reads this to explain it instead of leaving the user guessing.
+    if (!midi.isEmpty()) visGotMidi.store(true);
 
     // Output RMS for the signal meter (cheap, once per block).
     {

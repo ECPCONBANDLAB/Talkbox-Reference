@@ -52,6 +52,7 @@ struct EngineParams {
     float outputGain = 1.0f;
     // Synth
     int synthWave = 0; float synthOctave = 0.0f, synthGlide = 0.06f, synthVibrato = 0.0f;
+    float arpRate = 8.0f;   // arp steps per second when a chord is held
     // Modes
     QualityMode quality = QualityMode::Balanced;
     SourceMode source = SourceMode::Pad;
@@ -241,6 +242,7 @@ struct TalkboxEngine {
         lipMic.micDistanceCm = clampf(p.micDistance * (1.0f - 0.6f*p.micProximity), 1.f, 30.f);
         synth.glideTime = p.synthGlide; synth.vibratoDepth = p.synthVibrato;
         synth.octave = clampf(p.synthOctave, -2.f, 2.f);
+        synth.arpRate = clampf(p.arpRate, 0.5f, 20.f);
         synth.setWaveform(p.synthWave);
         lpc.gateThresh = p.gateThresh; lpc.whisperBoost = p.whisperBoost; lpc.smooth = p.micSmooth;
 
