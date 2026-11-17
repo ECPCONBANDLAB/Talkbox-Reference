@@ -1,0 +1,45 @@
+{
+  "project": "TalkBox Reference",
+  "version": "1.0.0",
+  "date": "2026-11-17",
+  "formats": ["VST3", "AU", "CLAP", "Standalone"],
+  "os": ["Windows", "macOS (Universal)", "Linux"],
+  "aax": "skipped (Avid SDK licensing — see docs/07)",
+  "dsp": {
+    "tests": "40 PASS / 0 FAIL",
+    "formants_engine": "F1 <=2.3%, F2 <=1.4%, F3 <=1.6% (9 vowels, VTL=1.0)",
+    "lpc_whisper": "F1 1-15%, F2 0-5% (/i/, /a/, /u/), bleed ~-inf dB",
+    "cpu_48k_128": {
+      "eco_pad": "0.32%",
+      "eco_mic": "0.61%",
+      "balanced_pad": "0.42%",
+      "balanced_mic": "0.71%",
+      "studio_pad": "0.53%",
+      "studio_mic": "0.82%"
+    }
+  },
+  "files": {
+    "docs": ["docs/01_Research_and_Physics_Report.md", "docs/02_DSP_and_Accuracy_Specification.md", "docs/03_GUI_and_UX_Specification.md", "docs/04_Performance_and_CPU_Specification.md", "docs/05_Test_and_Validation_Report.md", "docs/06_User_Manual.md", "docs/07_Install_and_Uninstall_Guide.md"],
+    "test_output": "artifacts/test_output.txt",
+    "checksums": "artifacts/SHA256SUMS.txt",
+    "handoff": "artifacts/Final_Handoff_Report.md"
+  },
+  "cloud": {
+    "github": "pending (create repo TalkBox-Reference, push, tag v1.0.0, attach binaries + SHA256SUMS.txt) — no GitHub connector in this workspace; local repo is complete and push-ready",
+    "google_drive": {
+      "handoff": "https://drive.google.com/file/d/1Lfxm7JFFTPbIRwnzNP7G9v9CnLXz_ljj/view?usp=drivesdk",
+      "test_output": "https://drive.google.com/file/d/1R37LjLohGGAqCUFW4FzOyPgxSRf2kGYR/view?usp=drivesdk",
+      "presets": "https://drive.google.com/file/d/1XA9abv2EiIQSGjqV26kZ7uwlhvJXNxis/view?usp=drivesdk",
+      "checksums": "https://drive.google.com/file/d/1SjQgpbuuuEdihiuCaWBpcYmxy6-UQOGL/view?usp=drivesdk"
+    },
+    "google_docs": {
+      "01_research": "https://docs.google.com/document/d/1egePX_98mr749DXqSKRtlM1IpGPEo7xDhU5xEfzEW1A/edit?usp=drivesdk",
+      "02_dsp": "https://docs.google.com/document/d/1oaKEQ3vuO8j8YB1QynDyRYwSwgijBtGTpqvwnhiHfKQ/edit?usp=drivesdk",
+      "03_gui": "https://docs.google.com/document/d/1ZbqylDd-IVRBVJsgyF6Ch-XXMNo4Efbi6870kJdp9u4/edit?usp=drivesdk",
+      "04_cpu": "https://docs.google.com/document/d/1piBE-K6nG8HUmdzWue2pgHE8MQdsv6HUEY7caUHzB9g/edit?usp=drivesdk",
+      "05_tests": "https://docs.google.com/document/d/1A1h_3wQihRQO_XmOodD7NkaQYeeLr77t8szhefA-PNM/edit?usp=drivesdk",
+      "06_manual": "https://docs.google.com/document/d/1XbpyC1zKSBcmJ4bvNEBaMHIo3xUKl7acvKXcBnO1OfI/edit?usp=drivesdk",
+      "07_install": "https://docs.google.com/document/d/1DCjChxZTgnykT_OAQSQiEaorVEfdHisSXEXuxFqXzT4/edit?usp=drivesdk"
+    }
+  }
+}

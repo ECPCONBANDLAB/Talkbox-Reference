@@ -1,0 +1,34 @@
+name: CI — TalkBox Reference
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  dsp-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build & run headless DSP tests
+        run: |
+          g++ -std=c++20 -O2 -Wall -Wextra -I src/dsp tests/test_main.cpp -o tests/run_tests
+          ./tests/run_tests
+      - name: Upload test output
+        if: always()
+        run: ./tests/run_tests > artifacts/test_output.txt 2>&1 || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: artifacts/test_output.txt
+
+  cmake-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure (DSP-only, no JUCE)
+        run: cmake -B build -DTB_BUILD_JUCE=OFF
+      - name: Build
+        run: cmake --build build --config Release
+      - name: CTest
+        run: ctest --test-dir build --output-on-failure
