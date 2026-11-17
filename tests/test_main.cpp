@@ -99,12 +99,14 @@ static bool testFormants() {
         eng.p.source=SourceMode::Pad; eng.p.carrier=CarrierMode::External;
         eng.p.quality=QualityMode::Eco; eng.updateQuality();
         eng.p.padX=kRefXY[v][0]; eng.p.padY=kRefXY[v][1];
-        eng.p.tongueX=kRefXY[v][0]; eng.p.jaw=kRefXY[v][1]; eng.p.tongueHeight=kRefXY[v][1];
+        // detail controls are offsets around neutral 0.5: leave them there
+        eng.p.tongueX=0.5f; eng.p.jaw=0.5f; eng.p.tongueHeight=0.5f;
         eng.p.vtl=1.0f; eng.p.dryWet=1.0f; eng.p.outputGain=1.0f; eng.p.glide=0.0f;
-        // Warmup: let control-rate coefficients settle before impulse
+        // Warmup: let the control-rate coefficients settle before the impulse.
+        // 4096 samples is ~85 control ticks, well past the articulation glide.
         {
-            std::vector<float> zc(512,0.f), zm(512,0.f), zL(512), zR(512);
-            eng.processBlock(zc.data(), zm.data(), zL.data(), zR.data(), 512);
+            std::vector<float> zc(4096,0.f), zm(4096,0.f), zL(4096), zR(4096);
+            for (int k=0;k<8;++k) eng.processBlock(zc.data(), zm.data(), zL.data(), zR.data(), 512);
         }
         // small-signal impulse (stay in linear regime of driver/mic saturation)
         std::vector<float> carrier(4096,0.f), mic(4096,0.f), L(4096), R(4096);
@@ -129,7 +131,11 @@ static bool testFormants() {
     for(int v=0; v<9; ++v){
         VocalTract tr; tr.prepare(fs);
         Formants f=padToFormants(kRefXY[v][0],kRefXY[v][1],1.0f,0.0f);
-        tr.setTarget(f,0.0f,0.8f,0.0f); tr.updateCoeffs();
+        // Settle: the tract glides to its target, so measure the steady state
+        // rather than the transition (measuring mid-glide tests the glide).
+        tr.setTarget(f,0.0f,0.8f,0.0f);
+        for (int k=0;k<64;++k) tr.updateCoeffs();
+        tr.setTarget(f,0.0f,0.8f,0.0f);
         std::vector<float> ir(4096,0.f); ir[0]=0.05f;
         std::vector<float> out(4096);
         for(int i=0;i<4096;++i) out[i]=tr.process(ir[i]);
@@ -167,7 +173,10 @@ static bool testLpc() {
     for(int v : {0,4,7}){ // /i/, /ah/, /oo/
         VocalTract src; src.prepare(fs);
         Formants f=padToFormants(kRefXY[v][0],kRefXY[v][1],1.0f,0.f);
-        src.setTarget(f,0.f,0.8f,0.f); src.updateCoeffs();
+        // Settle the source tract: the synth signal must be a steady vowel, not
+        // a glide, or the LPC tracker is fed a moving target.
+        src.setTarget(f,0.f,0.8f,0.f);
+        for (int k=0;k<64;++k) src.updateCoeffs();
         // Build 0.5s mic signal: white noise through source tract (whisper)
         std::vector<float> micSig(24000);
         unsigned seed=12345+v;
@@ -247,7 +256,7 @@ static bool testStability() {
             // rapid pad jumps + preset switches
             eng.p.padX = std::fmod(blk*0.37f,1.0f);
             eng.p.padY = std::fmod(blk*0.53f,1.0f);
-            eng.p.tongueX=eng.p.padX; eng.p.jaw=eng.p.padY;
+            eng.p.tongueX=0.5f; eng.p.jaw=eng.p.padY;
             if(blk%500==0){ eng.p.source = (eng.p.source==SourceMode::Pad)?SourceMode::Mic:SourceMode::Pad; }
             for(int i=0;i<128;++i){ c[i]=std::sin(2.f*kPi*220.f*(blk*128+i)/fs)*0.8f; m[i]=std::sin(2.f*kPi*150.f*(blk*128+i)/fs)*0.3f; }
             eng.processBlock(c.data(),m.data(),L.data(),R.data(),128);

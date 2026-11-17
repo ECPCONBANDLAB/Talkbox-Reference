@@ -160,9 +160,21 @@ struct VocalTract {
     }
     // Control-rate update (call every 16-64 samples). Ballistic smoothing.
     void updateCoeffs() noexcept {
-        float a = 1.0f - smooth*0.85f; // glide 0 => fast, 1 => slow
-        // clamp smoothing step to avoid zipper but allow fast morphs
-        a = clampf(a, 0.05f, 0.95f);
+        // glide is mapped to a real time constant, not a raw coefficient, so
+        // the control is usable across its whole travel:
+        //   0.0 ->  1 ms  (instant, still no click)
+        //   0.5 -> 35 ms  (natural speech articulation)
+        //   1.0 -> 400 ms (exaggerated portamento)
+        // a = 1 - exp(-dt/tau) with dt = samplesPerTick/fs.
+        // Geometric mapping: tau spans 1 ms .. 120 ms logarithmically, so every
+        // part of the knob travel is useful instead of bunching at the top.
+        // The default (smooth = 0.5) lands near 11 ms, which is the right order
+        // for speech articulation: fast enough to feel immediate, slow enough
+        // to remove zipper noise.
+        static constexpr float kDt = 16.0f / 48000.0f;
+        const float tau = 0.001f * std::pow(120.0f, smooth);
+        float a = 1.0f - std::exp(-kDt/tau);
+        a = clampf(a, 0.0025f, 0.95f);
         for (int i=0;i<5;++i) {
             cur.f[i] += (target.f[i]-cur.f[i])*a;
             cur.b[i] += (target.b[i]-cur.b[i])*a;

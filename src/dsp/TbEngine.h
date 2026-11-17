@@ -33,7 +33,12 @@ struct EngineParams {
     float padX = 0.5f, padY = 0.45f;
     float jaw = 0.45f, tongueX = 0.5f, tongueHeight = 0.45f;
     float lipRounding = 0.0f, mouthOpening = 0.8f, nasal = 0.0f;
-    float vtl = 1.0f, glide = 0.5f;
+    float vtl = 1.0f, glide = 0.3f;
+    // Macros that were previously declared in the UI but never reached the DSP
+    float mouthSize = 1.0f;      // 0.75..1.35, talkbox aperture
+    float articSmooth = 0.5f;    // 0..1, single-knob articulation inertia
+    float tubeCharacter = 0.5f;  // 0..1, transistor..tube even harmonics
+    float micProximity = 0.5f;   // 0..1, single-knob proximity effect
     // Mic
     float micPreGain = 1.0f, gateThresh = 0.008f, whisperBoost = 1.0f;
     float consonantCrisp = 0.7f, sibilDeess = 0.3f, voiceBleed = 0.0f;
@@ -128,9 +133,17 @@ struct TalkboxEngine {
     void controlTick() noexcept {
         // Pad formants from articulatory controls
         // Jaw/TongueHeight -> Y, TongueX -> X (blend with pad for automation)
-        float px = clampf(0.5f*p.padX + 0.5f*p.tongueX, 0.f, 1.f);
-        float py = clampf(0.5f*p.padY + 0.5f*(0.5f*p.jaw+0.5f*p.tongueHeight), 0.f, 1.f);
-        padFormants = padToFormants(px, py, p.vtl, p.lipRounding);
+        // The pad position IS the articulation. The tongue/jaw controls were
+        // previously averaged in at a fixed 50 %, which pinned every vowel
+        // halfway toward them and made the pad feel dead. They are now offsets
+        // around their neutral 0.5, so moving the pad alone gives the pad vowel.
+        float px = clampf(p.padX + (p.tongueX - 0.5f)*0.5f, 0.f, 1.f);
+        float py = clampf(p.padY + ((0.5f*(p.jaw + p.tongueHeight)) - 0.5f)*0.5f, 0.f, 1.f);
+        // mouthSize widens/narrows the talkbox aperture. It scales the effective
+        // tract length, so it shifts all formants together -- distinct from vtl,
+        // which models speaker size. 1.0 = neutral.
+        float vtlEff = clampf(p.vtl, 0.5f, 2.0f) / clampf(p.mouthSize, 0.75f, 1.35f);
+        padFormants = padToFormants(px, py, clampf(vtlEff,0.5f,2.0f), p.lipRounding);
 
         if (p.source == SourceMode::Mic) {
             // LPC analysis at hop rate (~4 ms), not every control tick (CPU).
@@ -146,8 +159,8 @@ struct TalkboxEngine {
                 if (open) {
                     Formants mf;
                     if (lpc.kToFormants(lpc.outK, LpcAnalyzer::kAnalysisRate, mf)) {
-                        // VTL warping in mic mode: scale by 1/VTL
-                        float s = 1.0f/clampf(p.vtl,0.5f,2.0f);
+                        // VTL warping in mic mode: same effective scale as the pad
+                        float s = 1.0f/clampf(p.vtl/clampf(p.mouthSize,0.75f,1.35f),0.5f,2.0f);
                         for (int i=0;i<5;++i){ mf.f[i]*=s; mf.b[i]=clampf(mf.b[i],30.f,500.f); }
                         micFormants = mf;
                         micValid = true;
@@ -189,7 +202,12 @@ struct TalkboxEngine {
             active = padFormants;
         }
         curFormants = active;
-        tract.setTarget(active, activeNasal, activeMouth, p.glide);
+        // articSmooth and glide both control articulation inertia: glide is the
+        // fine control in the Vocal Tract tab, articSmooth the single macro.
+        // Average them so both are always audible; either one alone still moves
+        // the result by half its range.
+        const float glideEff = clampf(0.5f*p.glide + 0.5f*p.articSmooth, 0.f, 1.f);
+        tract.setTarget(active, activeNasal, activeMouth, glideEff);
         tract.updateCoeffs();
         lipMic.mouthOpening = activeMouth;
         lipMic.update();
@@ -208,12 +226,21 @@ struct TalkboxEngine {
         }
         // Sync params to sub-blocks (cheap, control-rate-ish; called per block)
         driver.drive = 0.5f + p.carrierDrive*2.5f;
-        driver.asymmetry = p.diaphragmAsym;
+        // tubeCharacter blends the driver between symmetric (transistor, odd
+        // harmonics) and asymmetric (tube, even harmonics). Added to, rather
+        // than replacing, the explicit diaphragmAsym trim.
+        driver.asymmetry = clampf(p.diaphragmAsym + (p.tubeCharacter-0.5f)*0.6f, -0.5f, 0.5f);
         driver.comp = p.driverComp;
         hose.mouthReflect = 0.05f + (1.0f-p.mouthOpening)*0.25f;
         lipMic.proxBoost = p.proxBoost; lipMic.micDistanceCm = p.micDistance;
         lipMic.micModel = p.micModel; lipMic.outGain = p.outputGain;
+        lipMic.ambience = p.ambience;
+        // micProximity is the single-knob form of the proximity effect: it
+        // scales proxBoost and pushes the virtual mic closer as it rises.
+        lipMic.proxBoost = clampf(0.5f*p.proxBoost + 0.5f*p.micProximity, 0.f, 1.f);
+        lipMic.micDistanceCm = clampf(p.micDistance * (1.0f - 0.6f*p.micProximity), 1.f, 30.f);
         synth.glideTime = p.synthGlide; synth.vibratoDepth = p.synthVibrato;
+        synth.octave = clampf(p.synthOctave, -2.f, 2.f);
         synth.setWaveform(p.synthWave);
         lpc.gateThresh = p.gateThresh; lpc.whisperBoost = p.whisperBoost; lpc.smooth = p.micSmooth;
 

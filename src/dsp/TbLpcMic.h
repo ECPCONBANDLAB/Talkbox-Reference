@@ -294,6 +294,14 @@ struct LipMicStage {
     TptSvFilter::OnePole radLp; // for radiation shelf
     TptSvFilter::OnePole proxLp;
     TptSvFilter presPeak;
+    // Ambience: short comb pair + allpass modelling the tube and hand-cup
+    // reflections that colour a real talkbox. Preallocated; skipped at 0.
+    static constexpr int kAmbMax = 2400;   // 50 ms at 48 kHz
+    float amb1[kAmbMax] = {}; float amb2[kAmbMax] = {};
+    int ambIdx1 = 0, ambIdx2 = 0;
+    int ambLen1 = 733, ambLen2 = 1103;     // ~15.3 / 23.0 ms at 48 kHz
+    float ambApX[64] = {}; int ambApIdx = 0;
+    float ambience = 0.0f;
     float fs=48000.f;
     float mouthOpening=0.8f;
     float proxBoost=0.5f; // 0..1
@@ -302,7 +310,11 @@ struct LipMicStage {
     float outGain=1.0f;
     float ceiling=0.89f; // -1 dBFS
 
-    void prepare(float sampleRate) noexcept { fs=sampleRate; update(); }
+    void prepare(float sampleRate) noexcept { fs=sampleRate; lengthsFromFs(); update(); }
+    void lengthsFromFs() noexcept {
+        ambLen1 = (int)clampf(fs*0.0153f, 8.f, (float)kAmbMax-2.f);
+        ambLen2 = (int)clampf(fs*0.0230f, 8.f, (float)kAmbMax-2.f);
+    }
     void update() noexcept {
         float radFc = 400.0f + mouthOpening*2000.0f;
         radLp.setCutoff(clampf(radFc,200.f,0.45f*fs), fs);
@@ -331,6 +343,25 @@ struct LipMicStage {
         } else if (micModel==1) { // condenser: bright
             y += (y - radLp.lowpass(y))*0.15f;
         }
+        // Ambience: short comb pair + allpass. A real talkbox output carries
+        // the tube and hand-cup reflections; this is what makes it sound "in a
+        // tube" instead of dry. Costs nothing when ambience == 0.
+        if (ambience > 0.001f) {
+            const float d1 = amb1[ambIdx1];
+            const float d2 = amb2[ambIdx2];
+            const float fb = 0.42f + 0.30f*ambience;
+            amb1[ambIdx1] = y + d1*fb;
+            amb2[ambIdx2] = y + d2*fb*0.87f;
+            if (++ambIdx1 >= ambLen1) ambIdx1 = 0;
+            if (++ambIdx2 >= ambLen2) ambIdx2 = 0;
+            const float wet = (d1 + d2) * 0.5f;
+            const int apLen = 37;                 // ~0.77 ms diffuser
+            const float apd = ambApX[ambApIdx];
+            const float apOut = -wet + apd;
+            ambApX[ambApIdx] = wet + apd*0.5f;
+            if (++ambApIdx >= apLen) ambApIdx = 0;
+            y += apOut * ambience * 0.35f;
+        }
         // Preamp saturation (soft)
         y = std::tanh(y*1.2f)/1.2f;
         y *= outGain;
@@ -339,7 +370,12 @@ struct LipMicStage {
         if (y<-ceiling) y = -ceiling + (y+ceiling)*0.1f;
         return sanitize(y);
     }
-    void reset() noexcept { radLp.reset(); proxLp.reset(); presPeak.reset(); }
+    void reset() noexcept {
+        radLp.reset(); proxLp.reset(); presPeak.reset();
+        std::memset(amb1,0,sizeof(amb1)); std::memset(amb2,0,sizeof(amb2));
+        std::memset(ambApX,0,sizeof(ambApX));
+        ambIdx1 = ambIdx2 = ambApIdx = 0;
+    }
 };
 
 } // namespace tb

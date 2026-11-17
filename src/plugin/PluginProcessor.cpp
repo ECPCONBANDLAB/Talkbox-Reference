@@ -46,7 +46,7 @@ TalkBoxReferenceProcessor::createLayout() {
     addFloat("carrierDrive", 0.6f, 0.f, 1.f);
     addFloat("tubeCharacter", 0.5f, 0.f, 1.f);
     addFloat("mouthSize", 1.0f, 0.75f, 1.35f);
-    addFloat("articSmooth", 0.5f, 0.f, 1.f);
+    addFloat("articSmooth", 0.3f, 0.f, 1.f);
     addFloat("consonantCrisp", 0.7f, 0.f, 1.f);
     addFloat("micProximity", 0.5f, 0.f, 1.f);
     addFloat("dryWet", 1.0f, 0.f, 1.f);
@@ -56,7 +56,7 @@ TalkBoxReferenceProcessor::createLayout() {
     addFloat("jaw", 0.45f, 0.f, 1.f); addFloat("tongueX", 0.5f, 0.f, 1.f);
     addFloat("tongueHeight", 0.45f, 0.f, 1.f); addFloat("lipRounding", 0.f, 0.f, 1.f);
     addFloat("mouthOpening", 0.8f, 0.f, 1.f); addFloat("nasal", 0.f, 0.f, 1.f);
-    addFloat("vtl", 1.0f, 0.5f, 2.0f); addFloat("glide", 0.5f, 0.f, 1.f);
+    addFloat("vtl", 1.0f, 0.5f, 2.0f); addFloat("glide", 0.3f, 0.f, 1.f);
     // Advanced: Mic & Carrier
     addChoice("micRouting", 0, {"Sidechain", "L-R Split"});
     addFloat("micPreGain", 1.0f, 0.f, 4.f); addFloat("gateThresh", 0.008f, 0.0005f, 0.05f);
@@ -127,6 +127,12 @@ void TalkBoxReferenceProcessor::syncParams() {
               : (q == 2) ? tb::QualityMode::Studio : tb::QualityMode::Creative;
     p.bypass = getF("bypass") > 0.5f;
     p.carrierDrive = getF("carrierDrive");
+    p.tubeCharacter = getF("tubeCharacter");
+    p.mouthSize = getF("mouthSize");
+    p.articSmooth = getF("articSmooth");
+    p.micProximity = getF("micProximity");
+    p.ambience = getF("ambience");
+    p.synthOctave = getF("synthOctave");
     p.vtl = getF("vtl"); p.glide = getF("glide");
     p.padX = getF("padX"); p.padY = getF("padY");
     p.jaw = getF("jaw"); p.tongueX = getF("tongueX"); p.tongueHeight = getF("tongueHeight");
