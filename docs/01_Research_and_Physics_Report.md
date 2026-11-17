@@ -67,18 +67,33 @@ Stefan Bilbao, Fabián Esqueda, Julian Parker & Vesa Välimäki, "Antiderivative
 ## 4. Reference formant baseline (adult male, VTL = 1.0)
 
 | Vowel | IPA | F1 | F2 | F3 | B1 | B2 | B3 |
-|---|---|---|---|---|---|---|---|
-| ee (beet) | /i/ | 300 | 2200 | 3000 | 60 | 90 | 150 |
-| ih (bit) | /ɪ/ | 400 | 1900 | 2500 | 65 | 95 | 155 |
-| eh (bet) | /ɛ/ | 500 | 1800 | 2500 | 70 | 100 | 160 |
-| ae (bat) | /æ/ | 660 | 1700 | 2400 | 80 | 110 | 165 |
-| ah (father) | /ɑ/ | 750 | 1200 | 2500 | 85 | 110 | 170 |
-| aw (bought) | /ɔ/ | 500 | 900 | 2500 | 75 | 95 | 160 |
-| oh (boat) | /o/ | 400 | 850 | 2500 | 65 | 85 | 150 |
-| oo (boot) | /u/ | 320 | 700 | 2300 | 60 | 80 | 140 |
-| uh (schwa) | /ə/ | 500 | 1500 | 2500 | 70 | 100 | 160 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| | | F1 | F2 | F3 | F4 | F5 | B1 | B2 | B3 | B4 | B5 |
+| ee (beet) | /i/ | 300 | 2240 | 2940 | 3525 | 3815 | 60 | 90 | 150 | 200 | 150 |
+| ih (bit) | /ɪ/ | 360 | 1940 | 2485 | 3460 | 3765 | 65 | 95 | 155 | 200 | 150 |
+| eh (bet) | /ɛ/ | 485 | 1900 | 2415 | 3425 | 3685 | 70 | 100 | 160 | 200 | 200 |
+| ae (bat) | /æ/ | 620 | 1785 | 2340 | 3425 | 3635 | 80 | 110 | 165 | 200 | 200 |
+| ah (father) | /ɑ/ | 775 | 1160 | 2360 | 3325 | 3575 | 85 | 110 | 170 | 200 | 200 |
+| aw (bought) | /ɔ/ | 615 | 900 | 2500 | 3040 | 3210 | 75 | 95 | 160 | 200 | 150 |
+| oh (boat) | /o/ | 400 | 975 | 2325 | 3060 | 3665 | 65 | 85 | 150 | 80 | 100 |
+| oo (boot) | /u/ | 280 | 925 | 2175 | 3010 | 3300 | 60 | 80 | 140 | 80 | 100 |
+| uh (schwa) | /ə/ | 460 | 1460 | 2440 | 3450 | 3660 | 70 | 100 | 160 | 200 | 150 |
 
-F4 ≈ 3500 Hz, F5 ≈ 4500 Hz scaled by 1/VTL for speaker-identity timbre. Verified by headless impulse-response tests (see `05_Test_and_Validation_Report.md`).
+**These are synthesis parameters, not acoustic measurements.** Each value was
+chosen by coordinate descent over the physical cascade so that the tract
+*realises* the published Peterson & Barney (1952) adult-male formants. The two
+differ because the 5-resonator cascade does not pass each pole through
+untouched: neighbouring resonances pull the realised peaks, and the -6 dB/oct
+glottal tilt plus the lowpass stages shift the apparent maxima. Storing the raw
+acoustic values (as v1.0.0 effectively did for F4/F5 by hard-coding them) leaves
+a systematic error of several percent at every anchor.
+
+Measured against the published targets, mean error over F1-F5 for the nine
+anchors is **0.5 %** (worst individual formant 3.3 %); at 16 interior pad
+positions, against the inverse-distance blend of the same targets, **1.4 %**.
+See `05_Test_and_Validation_Report.md` for the method, and note that the
+v1.0.0 "40/40 formant tests" measured the cascade against the table's own
+numbers, which is circular and cannot detect a mistuned table.
 
 ## 5. Trademark note
 

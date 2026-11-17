@@ -1,69 +1,69 @@
 TalkBox Reference — Test & Validation Suite
 ==========================================
 [1] Vowel formant accuracy (VTL=1.0, impulse response)
-  ee target F1=300 F2=2200 F3=3000 | est 295 2205 2988 | err 1.5% 0.2% 0.4%
+  ee target 270 2290 3010 3400 3900 | est 290 2250 2940 3530 3680 | err 7.4 1.7 2.3 3.8 5.6 %
   PASS ee
-  ih target F1=400 F2=1900 F3=2500 | est 391 1899 2491 | err 2.3% 0.0% 0.3%
+  ih target 390 1990 2550 3350 3850 | est 350 1950 2470 3490 3730 | err 10.3 2.0 3.1 4.2 3.1 %
   PASS ih
-  eh target F1=500 F2=1800 F3=2500 | est 506 1804 2491 | err 1.1% 0.2% 0.3%
+  eh target 530 1840 2480 3300 3800 | est 480 1910 2400 3440 3590 | err 9.4 3.8 3.2 4.2 5.5 %
   PASS eh
-  ae target F1=660 F2=1700 F3=2400 | est 658 1709 2377 | err 0.3% 0.5% 1.0%
+  ae target 660 1720 2410 3300 3750 | est 620 1790 2320 3450 3600 | err 6.1 4.1 3.7 4.5 4.0 %
   PASS ae
-  ah target F1=750 F2=1200 F3=2500 | est 754 1193 2491 | err 0.5% 0.6% 0.3%
+  ah target 730 1090 2440 3200 3700 | est 780 1150 2350 3350 3500 | err 6.8 5.5 3.7 4.7 5.4 %
   PASS ah
-  aw target F1=500 F2=900 F3=2500 | est 506 887 2472 | err 1.1% 1.4% 1.1%
+  aw target 570 840 2410 3150 3650 | est 620 890 2500 3080 3230 | err 8.8 6.0 3.7 2.2 11.5 %
   PASS aw
-  oh target F1=400 F2=850 F3=2500 | est 391 849 2472 | err 2.3% 0.1% 1.1%
+  oh target 440 1020 2240 3100 3600 | est 400 970 2310 3080 3640 | err 9.1 4.9 3.1 0.6 1.1 %
   PASS oh
-  oo target F1=320 F2=700 F3=2300 | est 315 696 2262 | err 1.7% 0.5% 1.6%
+  oo target 300 870 2240 3050 3550 | est 270 920 2150 3270 3420 | err 10.0 5.7 4.0 7.2 3.7 %
   PASS oo
-  uh target F1=500 F2=1500 F3=2500 | est 506 1498 2491 | err 1.1% 0.1% 0.3%
+  uh target 500 1500 2500 3300 3800 | est 460 1460 2430 3610 3760 | err 8.0 2.7 2.8 9.4 1.1 %
   PASS uh
 [1b] Pure vocal-tract formants (stricter)
-  tract ee est 315 2167 | err 4.9% 1.5%
+  tract ee est 300 2210 2910 3520 3800 | err 11.1 3.5 3.3 3.5 2.6 %
   PASS tract formant
-  tract ih est 410 1880 | err 2.5% 1.0%
+  tract ih est 360 1920 2470 3490 3770 | err 7.7 3.5 3.1 4.2 2.1 %
   PASS tract formant
-  tract eh est 506 1785 | err 1.1% 0.8%
+  tract eh est 480 1880 2400 3440 3590 | err 9.4 2.2 3.2 4.2 5.5 %
   PASS tract formant
-  tract ae est 658 1689 | err 0.3% 0.6%
+  tract ae est 610 1770 2330 3450 3600 | err 7.6 2.9 3.3 4.5 4.0 %
   PASS tract formant
-  tract ah est 735 1212 | err 2.0% 1.0%
+  tract ah est 770 1170 2350 3350 3500 | err 5.5 7.3 3.7 4.7 5.4 %
   PASS tract formant
-  tract aw est 506 926 | err 1.1% 2.8%
+  tract aw est 610 920 2490 3090 3240 | err 7.0 9.5 3.3 1.9 11.2 %
   PASS tract formant
-  tract oh est 410 868 | err 2.5% 2.2%
+  tract oh est 400 1000 2310 3110 3680 | err 9.1 2.0 3.1 0.3 2.2 %
   PASS tract formant
-  tract oo est 334 735 | err 4.3% 5.0%
+  tract oo est 290 950 2160 3080 3330 | err 3.3 9.2 3.6 1.0 6.2 %
   PASS tract formant
-  tract uh est 506 1498 | err 1.1% 0.1%
+  tract uh est 460 1460 2430 3660 3810 | err 8.0 2.7 2.8 10.9 0.3 %
   PASS tract formant
   VTL scaling ratio 0.833 (expect 0.833)
   PASS VTL scaling
   (pitch independence by source-filter design: tract is LTI at fixed articulation)
 [2] LPC whisper/speech tracking
-  whisper ee target F1=300 F2=2200 | tracked F1=254 F2=2201 F3=2966
-    tracked err F1=15.4% F2=0.1% (expect <30%)
+  whisper ee target F1=270 F2=2290 | tracked F1=254 F2=2236 F3=2897
+    tracked err F1=6.0% F2=2.4% (expect <30%)
   PASS LPC F1/F2 tracking
-    noise-carrier out est 2950 2988 3064
+    noise-carrier out est 320 2900 3090
   bleed RMS (carrier silent) 0.00000 (expect <0.05)
   PASS voice bleed < -60dB approx
-  whisper ah target F1=750 F2=1200 | tracked F1=722 F2=1266 F3=2408
-    tracked err F1=3.7% F2=5.5% (expect <30%)
+  whisper ah target F1=730 F2=1090 | tracked F1=735 F2=1228 F3=2308
+    tracked err F1=0.7% F2=12.7% (expect <30%)
   PASS LPC F1/F2 tracking
-    noise-carrier out est 773 1117 1155
+    noise-carrier out est 740 1160 1530
   bleed RMS (carrier silent) 0.00000 (expect <0.05)
   PASS voice bleed < -60dB approx
-  whisper oo target F1=320 F2=700 | tracked F1=323 F2=706 F3=2306
-    tracked err F1=1.1% F2=0.8% (expect <30%)
+  whisper oo target F1=300 F2=870 | tracked F1=289 F2=1019 F3=2201
+    tracked err F1=3.8% F2=17.1% (expect <30%)
   PASS LPC F1/F2 tracking
-    noise-carrier out est 429 467 620
+    noise-carrier out est 300 920 1830
   bleed RMS (carrier silent) 0.00000 (expect <0.05)
   PASS voice bleed < -60dB approx
   sibilance detector on noise: 0.500 (expect >0.3)
   PASS sibilance detect
 [3] Stability torture + NaN/Inf/DC
-  torture maxAbs=0.825 bad=0
+  torture maxAbs=0.826 bad=0
   PASS torture stable
   SR=44100 bs=16 bounded=1
   PASS NaN recovery
@@ -91,13 +91,13 @@ TalkBox Reference — Test & Validation Suite
   PASS NaN recovery
   PASS |k|<=0.995
 [4] CPU benchmarks (48kHz, 128-sample buffer)
-  Eco / Pad                       9.74 us/block   0.37% single-core
-  Eco / Mic LPC                  19.23 us/block   0.72% single-core
-  Balanced / Pad                 14.05 us/block   0.53% single-core
-  Balanced / Mic LPC             23.04 us/block   0.86% single-core
-  Studio / Pad                   16.89 us/block   0.63% single-core
-  Studio / Mic LPC               26.37 us/block   0.99% single-core
-  8x Balanced instances: 12.02 us/block/instance
+  Eco / Pad                       9.04 us/block   0.34% single-core
+  Eco / Mic LPC                  16.46 us/block   0.62% single-core
+  Balanced / Pad                 12.28 us/block   0.46% single-core
+  Balanced / Mic LPC             19.54 us/block   0.73% single-core
+  Studio / Pad                   15.51 us/block   0.58% single-core
+  Studio / Mic LPC               22.64 us/block   0.85% single-core
+  8x Balanced instances: 11.31 us/block/instance
   (Budgets: Eco <0.6% pad / <0.9% mic; Balanced <1.5%; Studio <3.5% @48k/128)
 
 Summary: PASS=40 FAIL=0 | formants=1 lpc=1 stability=1
