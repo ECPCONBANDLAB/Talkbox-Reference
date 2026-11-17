@@ -67,8 +67,30 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=Release
           -DTB_BUILD_JUCE=ON -DJUCE_PATH=third_party/JUCE
 
+      # Tee the build so a failure can be surfaced as an annotation: the raw
+      # Actions log lives on Azure Blob and is not always retrievable.
       - name: Build VST3 and Standalone
-        run: cmake --build build --config Release --parallel 2
+        shell: bash
+        run: |
+          set -o pipefail
+          cmake --build build --config Release --parallel 2 2>&1 | tee /tmp/build.log || {
+            echo "=== BUILD FAILED ==="
+            # First real compiler / linker errors, as annotations.
+            n=0
+            grep -nE "error:|undefined reference|Error [0-9]" /tmp/build.log | head -20 | while IFS= read -r line; do
+              echo "::error::${line}"
+            done
+            echo "=== last 60 lines ==="
+            tail -60 /tmp/build.log
+            exit 1
+          }
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-build-log
+          path: /tmp/build.log
 
       - name: Confirm the expected artifacts exist
         run: |
