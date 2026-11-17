@@ -88,7 +88,9 @@ jobs:
 
   # -------------------------------------------------------------------------
   # Optional: plugin binaries, triggered manually. Produces UNSIGNED
-  # VST3/CLAP/Standalone artifacts. Enable only with the maintainer's consent.
+  # VST3/Standalone artifacts. Enable only with the maintainer's consent.
+  # WARNING: distributing JUCE-linked binaries requires GPLv3 or a commercial
+  # JUCE licence (see LICENSE-NOTES.md). Not validated; do not enable casually.
   # -------------------------------------------------------------------------
   binaries:
     name: Plugin binaries (${{ matrix.os }})

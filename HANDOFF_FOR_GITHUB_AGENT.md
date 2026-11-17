@@ -1,7 +1,7 @@
 # Handoff for the GitHub-capable agent
 
 **Project:** TalkBox Reference v1.0.0 — physically grounded, ultra-low-CPU
-source-filter talkbox emulation (VST3 / AU / CLAP / Standalone, C++20).
+source-filter talkbox emulation (VST3 / AU / Standalone, C++20).
 
 **Why this file exists:** everything except the GitHub publication is finished
 and verified. The agent that built the project has no GitHub connector
@@ -131,7 +131,7 @@ Let the workflow produce the binaries — do not upload locally built binaries.
 ### Repository metadata
 
 - **Name:** `TalkBox-Reference`
-- **Description:** `Physically grounded, ultra-low-CPU source-filter talkbox emulation (VST3/AU/CLAP/Standalone).`
+- **Description:** `Physically grounded, ultra-low-CPU source-filter talkbox emulation (VST3/AU/Standalone).`
 - **Topics:** `audio-plugin`, `talkbox`, `dsp`, `source-filter`, `waveguide`,
   `linear-prediction`, `juce`, `vst3`, `clap`, `cpp20`
 - **License:** `mit` (matches `LICENSE`)
@@ -172,7 +172,7 @@ poles → TPT, < 6 ms), or MIDI.
   44.1–192 kHz × 16–2048 samples.
 - Tests: 40/40 PASS (`g++ -std=c++20 -O2 -I src/dsp tests/test_main.cpp`).
 
-**Formats:** VST3, AU, CLAP, Standalone. AAX is not built (Avid licensing).
+**Formats:** VST3, AU (macOS), Standalone. No CLAP (JUCE 7.0.12 has no CLAP wrapper). AAX is not built (Avid licensing).
 
 **Known limitations:** sustained vowels at VTL = 1.0 (adult-male anchor);
 LPC validated on synthetic whispers; CPU figures are machine-dependent

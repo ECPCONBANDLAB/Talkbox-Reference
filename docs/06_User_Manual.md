@@ -13,7 +13,7 @@
 
 ## How to Play With Your Microphone (DAW Sidechain & Standalone Quick-Start)
 
-### DAW Sidechain (VST3/AU/CLAP)
+### DAW Sidechain (VST3/AU)
 
 1. Create **two tracks**: Track 1 = carrier (guitar/synth MIDI). Track 2 = mic (USB/XLR interface, input = your mic).
 2. Load **TalkBox Reference** on Track 1. Set **Source = Live Mic Control**, **Carrier = External Audio** (or Internal Synth for MIDI jamming).
