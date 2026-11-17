@@ -22,8 +22,9 @@
   consistent one for this codebase.
 - Nothing about the licence blocks a later change: permissive → copyleft is
   possible for future versions, copyleft → permissive is not.
-- Only the source is published in v1.0.0, so no commercial framework licence
-  is triggered by the release (see below).
+- The **repository source** stays MIT. The **Windows installer binary** is
+  published under the GPLv3, because it links JUCE 7 (see below). Those are two
+  separate things and both are stated wherever the download lives.
 
 ## Binaries and JUCE — the one real condition
 
@@ -37,7 +38,26 @@
   buy a commercial JUCE licence.
 - Do not casually upgrade to JUCE 8: it is **AGPLv3** or commercial, which is
   stricter than the GPLv3 option in JUCE 7.
-- Decide this before shipping installers, not before pushing source.
+
+### The choice that was made
+
+`TalkBoxReference-Setup-1.0.0.exe` is distributed under the **GPLv3**
+(`COPYING-GPL-3.0.txt`). That satisfies JUCE's dual-licence condition without
+buying a commercial JUCE licence.
+
+What this means concretely:
+
+- The installer, the VST3 and the standalone are GPLv3. Anyone who receives
+  them may copy, modify and redistribute them under the GPLv3.
+- **The corresponding source is this repository**, at the same version tag as
+  the binary, plus JUCE 7.0.12 from `github.com/juce-framework/JUCE`. That
+  satisfies GPLv3 §6 (source availability) without shipping a separate archive.
+- `src/dsp/` remains MIT *as source*. Anyone who wants a purely MIT,
+  JUCE-free product can build the headless engine from `src/dsp/` and never
+  touch `src/plugin/`.
+- If the project later buys a commercial JUCE licence, future binaries can be
+  released under MIT instead. Binaries already published under GPLv3 stay
+  GPLv3 — the licence cannot be revoked retroactively.
 
 ## How to change the licence later
 

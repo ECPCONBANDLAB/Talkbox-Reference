@@ -1,0 +1,117 @@
+name: Windows installer
+
+# Builds the Windows VST3 + Standalone, wraps them in an Inno Setup installer
+# and attaches the .exe to a GitHub release.
+#
+# LICENSING: the produced binary statically links JUCE 7, so it is distributed
+# under the GPLv3 (see LICENSE-NOTES.md). The DSP engine in src/dsp/ remains
+# MIT; the GPLv3 applies to the combined binary.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to attach the installer to'
+        required: true
+        default: 'v1.0.0'
+      publish_release:
+        description: 'Upload the installer to the release (otherwise artifact only)'
+        type: boolean
+        required: false
+        default: true
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  windows-installer:
+    name: Build + package (Windows)
+    runs-on: windows-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain versions
+        shell: pwsh
+        run: |
+          cmake --version
+          where.exe ISCC
+          Get-Command ISCC | Select-Object -ExpandProperty Source
+
+      # JUCE 7.0.12 is pinned everywhere else in this repo; keep it identical.
+      - name: Pin JUCE 7.0.12
+        shell: pwsh
+        run: git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE third_party/JUCE
+
+      - name: Configure
+        shell: pwsh
+        run: >
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DTB_BUILD_JUCE=ON -DJUCE_PATH=third_party/JUCE
+
+      - name: Build VST3 and Standalone
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          cmake --build build --config Release --parallel 2 2>&1 | Tee-Object -FilePath build.log
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "=== BUILD FAILED ==="
+            Select-String -Path build.log -Pattern 'error|Error [0-9]' |
+              Select-Object -First 25 | ForEach-Object { Write-Host "::error::$($_.Line)" }
+            exit 1
+          }
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-log
+          path: build.log
+          if-no-files-found: ignore
+
+      # Print what the build produced, so the log documents the real layout
+      # instead of us guessing at file names.
+      - name: Inspect artefacts
+        shell: pwsh
+        run: |
+          $art = "build/TalkBoxReference_artefacts/Release"
+          Get-ChildItem -Recurse $art | Select-Object -First 60 |
+            ForEach-Object { Write-Host $_.FullName }
+
+      - name: Compile the installer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          ISCC packaging\TalkBoxReference.iss | Tee-Object -FilePath iscc.log
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Get-ChildItem packaging\*.exe | Format-Table Name, Length
+
+      - name: Checksum the installer
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem packaging\TalkBoxReference-Setup-*.exe | Select-Object -First 1
+          $hash = (Get-FileHash $exe.FullName -Algorithm SHA256).Hash.ToLower()
+          "$hash  $($exe.Name)" | Out-File -Encoding ascii "packaging\SHA256SUMS-windows.txt"
+          Get-Content "packaging\SHA256SUMS-windows.txt"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TalkBoxReference-Setup-windows
+          path: |
+            packaging/TalkBoxReference-Setup-*.exe
+            packaging/SHA256SUMS-windows.txt
+
+      - name: Attach to release
+        if: github.event_name == 'push' || github.event.inputs.publish_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: TalkBox Reference ${{ env.TAG }}
+          files: |
+            packaging/TalkBoxReference-Setup-*.exe
+            packaging/SHA256SUMS-windows.txt
+          fail_on_unmatched_files: true

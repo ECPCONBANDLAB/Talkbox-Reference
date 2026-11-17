@@ -34,9 +34,18 @@ cmake --build build --config Release
 
 Formats: 64-bit **VST3, AU (macOS), Standalone**. Windows / macOS (Universal) / Linux. No CLAP build (JUCE 7.0.12 has no CLAP wrapper) and no AAX (Avid SDK licensing) — see `docs/07`.
 
-## No installers in v1.0.0
+## Download (Windows) — GPLv3
 
-**There is no `Setup.exe`, `.dmg`, `.pkg` or portable ZIP.** The release ships source, docs and presets. That is deliberate: `src/plugin/` links JUCE 7.0.12, which is GPLv3-or-commercial, so publishing binaries would require GPLv3 terms (this repo is MIT) — and there is no code signing. Build from source with the two commands above; details in `docs/07` §0–1. See `LICENSE-NOTES.md`.
+`TalkBoxReference-Setup-1.0.0.exe` is attached to the
+[v1.0.0 release](../../releases/tag/v1.0.0) with its SHA-256. It installs the
+VST3 and the standalone, and uninstalls cleanly from *Installed apps*.
+
+**The installer is licensed GPLv3** because it links JUCE 7, which is
+GPLv3-or-commercial. The repository source stays MIT. Full reasoning:
+[`LICENSE-NOTES.md`](LICENSE-NOTES.md).
+
+**It is unsigned**, so SmartScreen warns on first run: *More info → Run anyway*.
+Prefer to build it yourself? See `docs/07` §1 — macOS and Linux are source-only.
 
 ## Repository
 
@@ -67,12 +76,15 @@ Final handoff: `artifacts/Final_Handoff_Report.md`
 
 ## License
 
-MIT — see `LICENSE`. Plain-language summary in [`LICENSE-NOTES.md`](LICENSE-NOTES.md).
+**Source: MIT** (`LICENSE`). **Windows installer binary: GPLv3**
+(`COPYING-GPL-3.0.txt`). Summary and reasoning in
+[`LICENSE-NOTES.md`](LICENSE-NOTES.md).
 
 - `src/dsp/` has no dependencies: MIT, unconditionally.
 - `src/plugin/` builds on JUCE 7.0.12, which is dual-licensed **GPLv3 or a paid
-  commercial licence**. Publishing *source* requires no JUCE licence;
-  distributing *binaries* requires GPLv3 or a commercial JUCE licence.
+  commercial licence**. Publishing *source* requires no JUCE licence.
+  Distributing *binaries* requires one of the two — this project uses **GPLv3**,
+  so the installer and the plugin it contains are GPLv3.
 - VST3 is MIT-licensed, so the format itself imposes no terms here.
 
 ## Trademark note
