@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  dsp-tests:
+    name: DSP tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -DTB_BUILD_TESTS=ON -DTB_BUILD_JUCE=OFF
+      - name: Build
+        run: cmake --build build --config Release -j 4
+      - name: Run validation suite
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Upload transcript
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-transcript-${{ matrix.os }}
+          path: build/Testing/Temporary/LastTest.log
+
+  sanitizers:
+    name: ASan + UBSan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build with sanitizers
+        run: |
+          g++ -std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer \
+              -I src/dsp -I tests tests/test_main.cpp -o tests/run_tests_asan
+      - name: Run
+        env:
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+          ASAN_OPTIONS: detect_leaks=1
+        run: ./tests/run_tests_asan
+
+  plugin-build:
+    name: JUCE plugin build (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libasound2-dev libfreetype-dev libfontconfig1-dev libx11-dev \
+            libxext-dev libxinerama-dev libxrandr-dev libxcursor-dev \
+            libgl1-mesa-dev libwebkit2gtk-4.1-dev
+      - name: Configure with JUCE
+        run: cmake -S . -B build -DTB_BUILD_JUCE=ON -DTB_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+      - name: Build VST3 + Standalone
+        run: cmake --build build -j 4 --target TalkBoxReference_VST3 TalkBoxReference_Standalone
+      - name: Upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: TalkBoxReference-VST3-linux
+          path: build/TalkBoxReference_artefacts/Release/VST3/**
+          if-no-files-found: warn

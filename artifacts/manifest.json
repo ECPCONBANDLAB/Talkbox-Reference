@@ -1,0 +1,266 @@
+{
+  "name": "TalkBox Reference",
+  "version": "1.0.0",
+  "releaseDate": "2026-11-17",
+  "license": "MIT (DSP, plugin code, docs); JUCE builds additionally under JUCE terms",
+  "repository": "https://github.com/ECPCONBANDLAB/Talkbox-Reference",
+  "language": "C++20",
+  "dependencies": {
+    "dsp": [],
+    "pluginShell": [
+      "JUCE >= 7.0.9"
+    ]
+  },
+  "validation": {
+    "suite": "tests/test_main.cpp",
+    "checks": 46,
+    "pass": 46,
+    "fail": 0,
+    "transcript": "artifacts/test_output.txt",
+    "command": "g++ -std=c++20 -O2 -I src/dsp -I tests tests/test_main.cpp -o tests/run_tests && ./tests/run_tests"
+  },
+  "metrics": {
+    "formantMaxErrorPct": {
+      "F1": 0.62,
+      "F2": 0.17,
+      "F3": 0.04
+    },
+    "whisperMaxErrorPct": {
+      "F1": 1.0,
+      "F2": 0.3
+    },
+    "latencySamples48k": 36,
+    "latencyMs48k": 0.75,
+    "hoseDelayMs": {
+      "1.50m": 4.38,
+      "2.00m": 5.83
+    },
+    "cpuPercent48k128": {
+      "Eco Pad": 1.1,
+      "Mic": 0.96,
+      "Balanced": 1.37,
+      "Studio": 1.97
+    },
+    "cpuBudgetPercent": {
+      "Eco Pad": 5,
+      "Mic": 5,
+      "Balanced": 6,
+      "Studio": 8
+    }
+  },
+  "presets": [
+    "Eco Pad",
+    "Mic",
+    "Balanced",
+    "Studio"
+  ],
+  "formats": [
+    "VST3",
+    "AU",
+    "CLAP",
+    "Standalone"
+  ],
+  "platforms": [
+    "Windows 10+ x64",
+    "macOS 11+",
+    "Linux x86_64"
+  ],
+  "documents": {
+    "01": "docs/01-overview.md",
+    "02": "docs/02-dsp-reference.md",
+    "03": "docs/03-validation.md",
+    "04": "docs/04-build-install.md",
+    "05": "docs/05-usage-presets.md",
+    "06": "docs/06-performance.md",
+    "07": "docs/07-limitations-roadmap.md"
+  },
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "bytes": 2269,
+      "sha256": "c91a56000819b97b277aa93dadabd25bfbf03272cbfc5a30e705a090cc17634d"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 341,
+      "sha256": "2f65be1cda5fe80490704af2aa377209967955140a21a510cf7efffb074827bf"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "bytes": 2835,
+      "sha256": "5345500aa42e936ed6328fa59e3e98100e782335f050350ad54fe6d7cce72f0f"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 3914,
+      "sha256": "767f71d28f03fd48d29bd6833bcb63c4e20f8e7cd6caca2a59ca9c7479eadd9a"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1550,
+      "sha256": "6f39440e06e34a8e2e7ae2e402c63f49f74fa3e01002d66199d866087150cab9"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4748,
+      "sha256": "dd15bc737a4b681ec055c0de7c3ff71216483742f87ec8a2bd6fb423d836e225"
+    },
+    {
+      "path": "artifacts/handoff.md",
+      "bytes": 5443,
+      "sha256": "d463a1ec6a03f747ce192542b2c0dcfdb8253640ecc5719dfcbf37b0624e1291"
+    },
+    {
+      "path": "artifacts/test_output.txt",
+      "bytes": 4042,
+      "sha256": "6c4f48f32ed1b7b851292252b25aa4d12d1cb222975c42fdd6c08f413c946c73"
+    },
+    {
+      "path": "docs/01-overview.md",
+      "bytes": 4226,
+      "sha256": "cf5b3911ae28144cfe502e6a576ce048cc0640effbb2b963f77e9df53a78ff8d"
+    },
+    {
+      "path": "docs/02-dsp-reference.md",
+      "bytes": 6768,
+      "sha256": "ae784383894d31dad3893e5d5d42ad7c8c2cf65ef2ed849bfbfa3caff3d24649"
+    },
+    {
+      "path": "docs/03-validation.md",
+      "bytes": 8040,
+      "sha256": "09956a26064aa26c93cc7c4c0acdf78066bbf8c17e92462876e9bca97352a8c5"
+    },
+    {
+      "path": "docs/04-build-install.md",
+      "bytes": 3664,
+      "sha256": "4f93497738edda681607a69ce59c5e18c7b11fee9a47c3b86ee92bbd73b904da"
+    },
+    {
+      "path": "docs/05-usage-presets.md",
+      "bytes": 3898,
+      "sha256": "f707c0c8213a9703e92006205a761927bbb35f558e2fd713b80c8d859f78075f"
+    },
+    {
+      "path": "docs/06-performance.md",
+      "bytes": 3060,
+      "sha256": "17b0c6b825abe14d5780b94733200455a1cafe5fabbd9585c1b4b72802a1ff98"
+    },
+    {
+      "path": "docs/07-limitations-roadmap.md",
+      "bytes": 3348,
+      "sha256": "e270cf7cc1d1f8115b4282194301d5e4d7cb1eb64c0c3e93a29d13ecab8e4d00"
+    },
+    {
+      "path": "packaging/install.sh",
+      "bytes": 2504,
+      "sha256": "0386d1abdf942f8d16674f40517e2a2730c5cc0383303ebc4f7f82288965dd61"
+    },
+    {
+      "path": "packaging/installer.iss",
+      "bytes": 3076,
+      "sha256": "43fb59d68586e6ddf9f6d7edc233a9fa6b41ff40a554ce7f6351d4e6041f8393"
+    },
+    {
+      "path": "packaging/portable/README.txt",
+      "bytes": 863,
+      "sha256": "4e86e830f9fdf7ca1131885c6a98c12c6cb4b3d7c2dba8079efcf35bd7e259d4"
+    },
+    {
+      "path": "packaging/uninstall.sh",
+      "bytes": 147,
+      "sha256": "6df00d8fbb246d18d54ec2b80689046e7b731bc5a7adb22f1bfe928fab3e0fd0"
+    },
+    {
+      "path": "presets/factory_presets.json",
+      "bytes": 2702,
+      "sha256": "1224cb995568c4f99ce46076291b2fa86230a09f8a35ecdcfad305712f3475d0"
+    },
+    {
+      "path": "src/dsp/Carrier.h",
+      "bytes": 4267,
+      "sha256": "74d28a9af220e1e8fde31fe3f0203b94d7cf50954806d112adbec9e351d1b7de"
+    },
+    {
+      "path": "src/dsp/Common.h",
+      "bytes": 16784,
+      "sha256": "73499cac74a29bf3dd457b8668c29d9622a93f31c5c32e4f2a5315701cfdf828"
+    },
+    {
+      "path": "src/dsp/Driver.h",
+      "bytes": 4384,
+      "sha256": "8817ec249fcee5b055fab58996033080d31db80bc48538016f0c19f1d8417507"
+    },
+    {
+      "path": "src/dsp/Engine.h",
+      "bytes": 8075,
+      "sha256": "5ed4725312594758e3ef080112af4e1082d35e53265d2d68111dab198715b3af"
+    },
+    {
+      "path": "src/dsp/Hose.h",
+      "bytes": 3905,
+      "sha256": "e10ddf212d5e59fa2328983e1ddadbfd47326b3e01e4b8def6f0415f4b1f4cc0"
+    },
+    {
+      "path": "src/dsp/Radiation.h",
+      "bytes": 9853,
+      "sha256": "414f5d28dd14f871a1d5129b7bb236bebddbdb0a3cfeda493809f964e9671585"
+    },
+    {
+      "path": "src/dsp/VocalTract.h",
+      "bytes": 6967,
+      "sha256": "1901d028be59b66017c39bd44e08436e0668eed3e612e9acc6b14777405b77e5"
+    },
+    {
+      "path": "src/plugin/PluginEditor.cpp",
+      "bytes": 8257,
+      "sha256": "805806d179f2f8e8e19c53427765a829f06788b1f0f081082971e9491a98b9f9"
+    },
+    {
+      "path": "src/plugin/PluginEditor.h",
+      "bytes": 1734,
+      "sha256": "4e4b5e78d91536774ff82e9c64cc821cc3dd7954da720e72e7399106a23a3969"
+    },
+    {
+      "path": "src/plugin/PluginProcessor.cpp",
+      "bytes": 6878,
+      "sha256": "0294bd2a08608b31d95bacf466ad0e08e9f9b93b9a9d2fc34a6fa17025f5471d"
+    },
+    {
+      "path": "src/plugin/PluginProcessor.h",
+      "bytes": 2394,
+      "sha256": "5ef843acbd50be0e17594798094ea5f074a9b9ab6db1cb5e07ec66bb4927ff3b"
+    },
+    {
+      "path": "src/plugin/TalkboxApi.cpp",
+      "bytes": 7874,
+      "sha256": "c6e0beb302668cec2a68b0ac84fca51e80196a3e17983474bb649d1d487d7c73"
+    },
+    {
+      "path": "src/plugin/TalkboxApi.h",
+      "bytes": 2711,
+      "sha256": "d9e0465175aad3937467debb329d7c4f2bd33d7391974e31b9b13cab4c07d4df"
+    },
+    {
+      "path": "src/ui/layout.md",
+      "bytes": 1397,
+      "sha256": "ad35abb194a6c8d3f0374f95b4c32ce04a168912e295b5d13b1a90bf401dfa90"
+    },
+    {
+      "path": "src/ui/mockup.svg",
+      "bytes": 5109,
+      "sha256": "d514832afc83bfcefd29c47791d90d05e831bb12ddbf4b6c7fe5f3947be2acac"
+    },
+    {
+      "path": "tests/LpcTools.h",
+      "bytes": 3563,
+      "sha256": "f8813c5e77cf3539ba2f1901aecbe4c6e2d569d6f8ce7d4d8c653d8157ef8fe7"
+    },
+    {
+      "path": "tests/test_main.cpp",
+      "bytes": 24466,
+      "sha256": "ec6b66cdeee81b6a9bddf039cc7b3430dda010708c5a442e99f869002fa9d80a"
+    }
+  ],
+  "fileCount": 37,
+  "totalBytes": 186056
+}
