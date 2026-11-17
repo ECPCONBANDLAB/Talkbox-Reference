@@ -106,6 +106,11 @@
       "sha256": "dd15bc737a4b681ec055c0de7c3ff71216483742f87ec8a2bd6fb423d836e225"
     },
     {
+      "path": "artifacts/cloud-links.md",
+      "bytes": 1957,
+      "sha256": "6f5b4b1609aea482247f7bbf2f5daf7d1ec327e674b970001914ef5c9bbcc48b"
+    },
+    {
       "path": "artifacts/handoff.md",
       "bytes": 5443,
       "sha256": "d463a1ec6a03f747ce192542b2c0dcfdb8253640ecc5719dfcbf37b0624e1291"
@@ -261,6 +266,30 @@
       "sha256": "ec6b66cdeee81b6a9bddf039cc7b3430dda010708c5a442e99f869002fa9d80a"
     }
   ],
-  "fileCount": 37,
-  "totalBytes": 186056
+  "fileCount": 38,
+  "totalBytes": 188013,
+  "cloud": {
+    "driveFolder": "https://drive.google.com/drive/folders/1ySqw7qL5Y6zsSshqsqlC20KFN3VKN4ek",
+    "documents": {
+      "01": "https://docs.google.com/document/d/1ZzxG1X37IrkIMqcGIln4K_4LkcySTy-e-361mgyaCBY/edit",
+      "02": "https://docs.google.com/document/d/1L-pLbVDhf1vgO9lKy8_adcRvITFNrgKoKwRDtMVnDCQ/edit",
+      "03": "https://docs.google.com/document/d/1CahfkmNGz4CuZ9mQdoC44EcEF5GdATnvRGx1hIsRSJY/edit",
+      "04": "https://docs.google.com/document/d/1jmMiGZUeMu6v-K6sazhizQkj1QKAhCJHK90FtCWHc5Q/edit",
+      "05": "https://docs.google.com/document/d/1bcaUQdxS9JRxi5iZ9Bxg3rUdgNeSumpwsx49dQOhWBA/edit",
+      "06": "https://docs.google.com/document/d/1-q9BUdSrNRdtm_KHcPKain9B8AeZ6Xh1wzklJvriKkU/edit",
+      "07": "https://docs.google.com/document/d/1ZeSz2nwRVy2PewmrdHCnPCrSFgWl9vxmLlXm7uBqzYg/edit",
+      "handoff": "https://docs.google.com/document/d/1sx01YbivLzUIyhZ9d3NufEjHgtbVlnQ4H2m90PvoYls/edit"
+    },
+    "files": {
+      "test_output": "https://drive.google.com/file/d/1y6cl6M1T5mnW6eSW5cR40DZmU6pls0hS/view",
+      "manifest": "https://drive.google.com/file/d/1ER-bom3v4e5rzqSL10wHliwPycgw1Nik/view",
+      "sha256": "https://drive.google.com/file/d/1IJycLPuW3PX1oEDAS6AwUA7EY_vwjDZX/view",
+      "presets": "https://drive.google.com/file/d/1ZmukrhjISOQrXnmyBr_FC0TuomLxPEsU/view"
+    },
+    "github": {
+      "branch": "arena/e9dbfec9-talkbox-reference",
+      "pullRequest": "https://github.com/ECPCONBANDLAB/Talkbox-Reference/pull/1",
+      "tag": "v1.0.0"
+    }
+  }
 }
