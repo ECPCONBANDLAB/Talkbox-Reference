@@ -29,6 +29,14 @@ TalkBoxReferenceProcessor::createLayout() {
         params.push_back(std::make_unique<AudioParameterFloat>(
             ParameterID(id, 1), id, NormalisableRange<float>(lo, hi), def));
     };
+    auto addPct = [&params](const char* id, float defPct) {
+        params.push_back(std::make_unique<AudioParameterFloat>(
+            ParameterID(id, 1), id, NormalisableRange<float>(0.f, 100.f), defPct));
+    };
+    auto addDb = [&params](const char* id, float defDb, float lo, float hi) {
+        params.push_back(std::make_unique<AudioParameterFloat>(
+            ParameterID(id, 1), id, NormalisableRange<float>(lo, hi), defDb));
+    };
     auto addChoice = [&params](const char* id, int def, std::initializer_list<const char*> items) {
         params.push_back(std::make_unique<AudioParameterChoice>(
             ParameterID(id, 1), id, StringArray(items), def));
@@ -43,39 +51,39 @@ TalkBoxReferenceProcessor::createLayout() {
     addChoice("quality", 1, {"Eco", "Balanced", "Studio", "Creative"});
     addBool("bypass", false);
     // Simple macros
-    addFloat("carrierDrive", 0.6f, 0.f, 1.f);
-    addFloat("tubeCharacter", 0.5f, 0.f, 1.f);
+    addPct("carrierDrive", 60.f);
+    addPct("tubeCharacter", 50.f);
     addFloat("mouthSize", 1.0f, 0.75f, 1.35f);
-    addFloat("articSmooth", 0.3f, 0.f, 1.f);
-    addFloat("consonantCrisp", 0.7f, 0.f, 1.f);
-    addFloat("micProximity", 0.5f, 0.f, 1.f);
-    addFloat("dryWet", 1.0f, 0.f, 1.f);
-    addFloat("outputGain", 1.0f, 0.f, 2.f);
+    addPct("articSmooth", 30.f);
+    addPct("consonantCrisp", 70.f);
+    addPct("micProximity", 50.f);
+    addPct("dryWet", 100.f);
+    addDb("outputGain", 0.f, -24.f, 12.f);
     // Advanced: Vocal Tract
-    addFloat("padX", 0.5f, 0.f, 1.f); addFloat("padY", 0.45f, 0.f, 1.f);
-    addFloat("jaw", 0.45f, 0.f, 1.f); addFloat("tongueX", 0.5f, 0.f, 1.f);
-    addFloat("tongueHeight", 0.45f, 0.f, 1.f); addFloat("lipRounding", 0.f, 0.f, 1.f);
-    addFloat("mouthOpening", 0.8f, 0.f, 1.f); addFloat("nasal", 0.f, 0.f, 1.f);
-    addFloat("vtl", 1.0f, 0.5f, 2.0f); addFloat("glide", 0.3f, 0.f, 1.f);
+    addPct("padX", 50.f); addPct("padY", 45.f);
+    addPct("jaw", 45.f); addPct("tongueX", 50.f);
+    addPct("tongueHeight", 45.f); addPct("lipRounding", 0.f);
+    addPct("mouthOpening", 80.f); addPct("nasal", 0.f);
+    addFloat("vtl", 1.0f, 0.5f, 2.0f); addPct("glide", 30.f);
     // Advanced: Mic & Carrier
     addChoice("micRouting", 0, {"Sidechain", "L-R Split"});
-    addFloat("micPreGain", 1.0f, 0.f, 4.f); addFloat("gateThresh", 0.008f, 0.0005f, 0.05f);
+    addDb("micPreGain", 0.f, -12.f, 24.f); addDb("gateThresh", -42.f, -66.f, -26.f);
     addChoice("gateBehavior", 0, {"Close Mouth Naturally", "Hold Last Vowel", "Return to Pad"});
-    addFloat("whisperBoost", 1.0f, 0.5f, 3.f); addFloat("sibilDeess", 0.3f, 0.f, 1.f);
-    addFloat("voiceBleed", 0.0f, 0.f, 1.f); addFloat("micSmooth", 0.6f, 0.f, 1.f);
+    addFloat("whisperBoost", 1.0f, 0.5f, 3.f); addPct("sibilDeess", 30.f);
+    addPct("voiceBleed", 0.f); addPct("micSmooth", 60.f);
     addChoice("synthWave", 0, {"Saw", "Pulse"});
     addFloat("synthOctave", 0.f, -2.f, 2.f); addFloat("synthGlide", 0.06f, 0.f, 0.5f);
     addFloat("synthVibrato", 0.f, 0.f, 1.f);
     // Advanced: Hardware Chain
-    addFloat("driverComp", 0.3f, 0.f, 1.f); addFloat("diaphragmAsym", 0.f, -0.5f, 0.5f);
+    addPct("driverComp", 30.f); addFloat("diaphragmAsym", 0.f, -50.f, 50.f);
     addFloat("hornCut", 6500.f, 4000.f, 9000.f);
-    addFloat("hoseLength", 1.75f, 1.0f, 2.5f); addFloat("hoseDamping", 0.3f, 0.f, 1.f);
+    addFloat("hoseLength", 1.75f, 1.0f, 2.5f); addPct("hoseDamping", 30.f);
     addChoice("micModel", 0, {"Classic Dynamic 57/58", "Crisp Studio Condenser",
                               "Warm Ribbon", "Flat Direct"});
-    addFloat("micDistance", 3.f, 1.f, 30.f); addFloat("proxBoost", 0.5f, 0.f, 1.f);
-    addFloat("ambience", 0.f, 0.f, 1.f);
+    addFloat("micDistance", 3.f, 1.f, 30.f); addPct("proxBoost", 50.f);
+    addPct("ambience", 0.f);
     // Carrier conditioning
-    addFloat("inputGain", 1.0f, 0.f, 4.f);
+    addDb("inputGain", 0.f, -24.f, 12.f);
 
     return {params.begin(), params.end()};
 }
@@ -119,6 +127,11 @@ void TalkBoxReferenceProcessor::syncParams() {
         if (auto* v = apvts.getRawParameterValue(id)) return v->load();
         return 0.0f;
     };
+    // Parameters carry real units so the UI readouts are honest (a knob
+    // labelled "dB" shows decibels). The engine works in linear gains and
+    // normalised 0..1, so every conversion happens here, once per block.
+    auto pct   = [&getF](const char* id) { return getF(id) * 0.01f; };
+    auto dbLin = [&getF](const char* id) { return std::pow(10.0f, getF(id) / 20.0f); };
     p.source = (getF("sourceMode") > 0.5f) ? tb::SourceMode::Mic : tb::SourceMode::Pad;
     p.carrier = (getF("carrierMode") > 0.5f) ? tb::CarrierMode::Internal : tb::CarrierMode::External;
     int q = (int)getF("quality");
@@ -126,35 +139,38 @@ void TalkBoxReferenceProcessor::syncParams() {
               : (q == 1) ? tb::QualityMode::Balanced
               : (q == 2) ? tb::QualityMode::Studio : tb::QualityMode::Creative;
     p.bypass = getF("bypass") > 0.5f;
-    p.carrierDrive = getF("carrierDrive");
-    p.tubeCharacter = getF("tubeCharacter");
+    p.carrierDrive = pct("carrierDrive");
+    p.tubeCharacter = pct("tubeCharacter");
     p.mouthSize = getF("mouthSize");
-    p.articSmooth = getF("articSmooth");
-    p.micProximity = getF("micProximity");
-    p.ambience = getF("ambience");
+    p.articSmooth = pct("articSmooth");
+    p.micProximity = pct("micProximity");
+    p.ambience = pct("ambience");
     p.synthOctave = getF("synthOctave");
-    p.vtl = getF("vtl"); p.glide = getF("glide");
-    p.padX = getF("padX"); p.padY = getF("padY");
-    p.jaw = getF("jaw"); p.tongueX = getF("tongueX"); p.tongueHeight = getF("tongueHeight");
-    p.lipRounding = getF("lipRounding"); p.mouthOpening = getF("mouthOpening");
-    p.nasal = getF("nasal");
-    p.micPreGain = getF("micPreGain"); p.gateThresh = getF("gateThresh");
+    p.vtl = getF("vtl"); p.glide = pct("glide");
+    p.padX = pct("padX"); p.padY = pct("padY");
+    p.jaw = pct("jaw"); p.tongueX = pct("tongueX"); p.tongueHeight = pct("tongueHeight");
+    p.lipRounding = pct("lipRounding"); p.mouthOpening = pct("mouthOpening");
+    p.nasal = pct("nasal");
+    p.micPreGain = dbLin("micPreGain");
+    // Gate threshold is in dBFS; the gate wants a linear amplitude.
+    p.gateThresh = std::pow(10.0f, getF("gateThresh") / 20.0f);
     int gb = (int)getF("gateBehavior");
     p.gateBehavior = (gb == 0) ? tb::GateBehavior::CloseMouth
                    : (gb == 1) ? tb::GateBehavior::HoldVowel
                                : tb::GateBehavior::ReturnToPad;
-    p.whisperBoost = getF("whisperBoost"); p.consonantCrisp = getF("consonantCrisp");
-    p.sibilDeess = getF("sibilDeess"); p.voiceBleed = getF("voiceBleed");
-    p.micSmooth = getF("micSmooth");
+    p.whisperBoost = getF("whisperBoost");
+    p.consonantCrisp = pct("consonantCrisp");
+    p.sibilDeess = pct("sibilDeess"); p.voiceBleed = pct("voiceBleed");
+    p.micSmooth = pct("micSmooth");
     p.synthWave = (int)getF("synthWave"); p.synthGlide = getF("synthGlide");
     p.synthVibrato = getF("synthVibrato");
-    p.driverComp = getF("driverComp"); p.diaphragmAsym = getF("diaphragmAsym");
+    p.driverComp = pct("driverComp"); p.diaphragmAsym = getF("diaphragmAsym") * 0.01f;
     p.hornCut = getF("hornCut");
-    p.hoseLength = getF("hoseLength"); p.hoseDamping = getF("hoseDamping");
+    p.hoseLength = getF("hoseLength"); p.hoseDamping = pct("hoseDamping");
     p.micModel = (int)getF("micModel"); p.micDistance = getF("micDistance");
-    p.proxBoost = getF("proxBoost");
-    p.dryWet = getF("dryWet"); p.outputGain = getF("outputGain");
-    p.inputGain = getF("inputGain");
+    p.proxBoost = pct("proxBoost");
+    p.dryWet = pct("dryWet"); p.outputGain = dbLin("outputGain");
+    p.inputGain = dbLin("inputGain");
     engine.updateQuality();
 }
 
@@ -212,6 +228,13 @@ void TalkBoxReferenceProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     buffer.clear();
     buffer.copyFrom(0, 0, outL.data(), n);
     if (numOut > 1) buffer.copyFrom(1, 0, outR.data(), n);
+
+    // Output RMS for the signal meter (cheap, once per block).
+    {
+        double acc = 0.0;
+        for (int i = 0; i < n; ++i) acc += (double)outL[(size_t)i] * outL[(size_t)i];
+        visRms.store((float)std::sqrt(acc / (double)n));
+    }
 
     // Visualizer taps
     for (int i = 0; i < 5; ++i) visF[i].store(engine.visF[i]);

@@ -18,7 +18,7 @@
 ; LICENCE: this binary links JUCE 7 under the GPLv3. See LICENSE-NOTES.md.
 
 #define MyAppName "TalkBox Reference"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "TalkBox Reference"
 ; Paths in this script are relative to this file (packaging\), so the
 ; repo-root items are reached with ..\
