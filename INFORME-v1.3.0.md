@@ -88,14 +88,29 @@ que es lo que convierte el rediseño en "menos perillas" en lugar de
 - **Layout**: verificado a 920×640, 1000×720 y 1600×1100. Ninguna pestaña
   desborda.
 
+## Lo que falló al publicar (y por qué fue útil)
+
+El primer intento de v1.3.0 **rompió el build de Windows**: `error C3615`,
+`std::pow` no es una expresión constante en la biblioteca estándar de MSVC.
+Mi comprobación local con g++ lo aceptó porque libstdc++ sí lo trata como
+constexpr. Es exactamente el hueco que avisé que no podía ver.
+
+Lo arreglé (quitar `constexpr` de `midiToHz`, que solo corre a frecuencia de
+audio) y audité por script **todas** las funciones `constexpr` del código
+buscando más casos: no hay ninguna otra.
+
+Y esta vez no volví a publicar a ciegas: lancé el workflow de Windows
+**contra la rama, sin publicar release**, esperé a que compilara VST3 +
+Standalone + instalador con MSVC, y solo entonces fusioné y etiqueté.
+
 ## Lo que NO puedo afirmar
 
-- **No he compilado el binario ni he visto la GUI.** En este entorno no hay
-  X11, ni freetype, ni permisos de root. Lo que verifiqué es que compila sin
-  errores contra JUCE 7.0.12 real, y calculé la geometría por script. Un fallo
-  de enlazado o visual solo aparecerá en el CI de Windows.
+- **No he visto la GUI funcionando.** El binario compila y se empaqueta, pero
+  en este entorno no hay X11 ni freetype para abrir la ventana. La geometría la
+  calculé por script a tres tamaños; el aspecto real solo lo verás tú.
 - **No he podido probarlo en FL Studio.** Simulé los tres caminos de señal,
-  pero un host real puede comportarse distinto.
+  pero un host real puede comportarse distinto. Esta es la prueba que falta y
+  la que harás tú.
 - **El splash y la licencia.** El badge aparece por defecto en JUCE 7; para
   desactivarlo hay que compilar con esa macro a 0. Bajo GPLv3 se distribuye el
   código fuente completo, y eso es lo que veníamos haciendo, así que la
@@ -105,7 +120,27 @@ que es lo que convierte el rediseño en "menos perillas" en lugar de
 - Los hashes los regeneré y validé en árbol limpio (49/49). Eso ha roto el
   Release tres veces; esta vez está comprobado antes de etiquetar.
 
-## Pendiente
+## Publicado
 
-No he etiquetado `v1.3.0` ni he lanzado el CI todavía. Dime si quieres que lo
-haga, y si el splash se queda fuera o lo devuelvo.
+- Tag `v1.3.0` sobre `247bd93` (commit verificado con MSVC antes de etiquetar).
+- Release con `TalkBoxReference-Setup-1.3.0.exe` — **3,313,660 B**.
+- Windows installer: success. Release: success. CI en main: success.
+- Tests en el release: **40/40 PASS**.
+- PRs #8 y #9 fusionadas.
+
+Splash desactivado, como pediste.
+
+## Lo que quiero saber de tu prueba en FL Studio
+
+Lo que no puedo simular:
+
+1. Al insertarlo en una pista con audio, ¿**suena a la primera** sin tocar nada?
+2. Los **6 macros**, ¿se sienten como grupos coherentes o como perillas que
+   hacen cosas raras a la vez?
+3. El **dado**, ¿da parches de verdad distintos entre sí al pulsarlo varias
+   veces?
+4. Las **etiquetas del pad**, ¿caen ahora donde suena cada vocal?
+5. El **instalador**, ¿te dejó elegir solo VST3?
+6. ¿Sigue apareciendo el badge "made with JUCE"?
+
+Si algo suena mal, dime qué y con qué ajustes, y lo mido.
