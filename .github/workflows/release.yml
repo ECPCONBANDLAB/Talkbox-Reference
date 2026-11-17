@@ -10,10 +10,6 @@ on:
         description: Tag to release
         required: true
         default: v1.0.0
-      build_binaries:
-        description: 'Also build plugin binaries with JUCE (unsigned; see notes)'
-        required: false
-        default: 'false'
 
 permissions:
   contents: write
@@ -87,50 +83,12 @@ jobs:
             dist/test_output.txt
 
   # -------------------------------------------------------------------------
-  # Optional: plugin binaries, triggered manually. Produces UNSIGNED
-  # VST3/Standalone artifacts. Enable only with the maintainer's consent.
-  # WARNING: distributing JUCE-linked binaries requires GPLv3 or a commercial
-  # JUCE licence (see LICENSE-NOTES.md). Not validated; do not enable casually.
+  # Windows prebuilt binaries are produced by .github/workflows/windows-installer.yml
+  # instead of here. That workflow builds with MSVC, compiles the Inno Setup
+  # installer and attaches TalkBoxReference-Setup-<version>.exe to the release.
+  #
+  # The old per-OS matrix that lived here was never validated and is removed so
+  # there is exactly one path that produces binaries.
+  #
+  # Reminder: the installer is GPLv3 because it links JUCE 7 (LICENSE-NOTES.md).
   # -------------------------------------------------------------------------
-  binaries:
-    name: Plugin binaries (${{ matrix.os }})
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_binaries == 'true'
-    needs: source-release
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
-
-      - name: Cache JUCE
-        uses: actions/cache@v4
-        with:
-          path: third_party/JUCE
-          key: juce-7.0.12-${{ matrix.os }}
-
-      - name: Fetch JUCE 7.0.12
-        run: |
-          git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE third_party/JUCE || true
-
-      - name: Configure with JUCE
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DTB_BUILD_JUCE=ON -DJUCE_PATH=third_party/JUCE
-
-      - name: Build
-        run: cmake --build build --config Release
-
-      - name: Package
-        shell: bash
-        run: |
-          mkdir -p dist
-          cp -r build/TalkBoxReference_artefacts/Release/* dist/ 2>/dev/null || true
-          cd dist && sha256sum $(find . -type f | sort) > SHA256SUMS.txt
-
-      - name: Upload binaries
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
-          files: dist/**

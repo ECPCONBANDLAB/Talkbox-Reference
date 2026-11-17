@@ -4,18 +4,31 @@
 
 ---
 
-## 0. Read this first — v1.0.0 ships no installers
+## 0. Read this first — what v1.0.0 actually ships
 
-**There is no `TalkBoxReference-Setup-1.0.0.exe`, no portable ZIP, no `.dmg`, no `.pkg`, no AppImage and no prebuilt plugin of any kind in the v1.0.0 release.**
+| Platform | What you can download |
+|---|---|
+| **Windows** | `TalkBoxReference-Setup-1.0.0.exe` — a real installer. **Licensed GPLv3** (it links JUCE 7). This is the only prebuilt binary. |
+| macOS | Nothing prebuilt. Build from source (§1). |
+| Linux | Nothing prebuilt. Build from source (§1). |
 
-The v1.0.0 release contains source code, documentation, presets and the test report only. Building the plugin is a source build, described in §1 below.
+The Windows installer is built by `.github/workflows/windows-installer.yml` on a
+`windows-latest` runner and attached to the release. Its SHA-256 is published
+alongside it as `SHA256SUMS-windows.txt`.
 
-Two reasons this is deliberate:
+**It is unsigned.** There is no Authenticode certificate, so SmartScreen will
+show "Windows protected your PC" the first time. Choose **More info → Run
+anyway**. If you would rather not trust an unsigned binary, build it yourself
+from §1 — the release also carries the full source.
 
-1. **Licensing.** `src/plugin/` links JUCE 7.0.12, which is dual-licensed **GPLv3 or paid commercial**. Publishing binaries therefore requires publishing them under GPLv3, or buying a JUCE licence. The repository is MIT, so shipping an MIT-labelled binary that statically links JUCE would misstate the terms. See `LICENSE-NOTES.md`.
-2. **No signing.** There is no Authenticode certificate and no Apple Developer ID / notarisation in place, so any installer would be blocked by SmartScreen on Windows and Gatekeeper on macOS.
+**Why GPLv3?** `src/plugin/` links JUCE 7.0.12, which is dual-licensed
+GPLv3-or-commercial. The GPLv3 route needs no purchase, so the binary is GPLv3.
+The repository source remains MIT. Full reasoning and what it means for you:
+`LICENSE-NOTES.md`. The licence is also shown by the installer and copied into
+the install directory as `COPYING-GPL-3.0.txt`.
 
-Earlier revisions of this document described installers as if they existed. They never did. That was an error and it is corrected here.
+Earlier revisions of this document described a portable ZIP and a Linux tarball
+that never existed. That was an error and it is corrected here.
 
 ---
 
