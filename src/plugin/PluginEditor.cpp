@@ -135,8 +135,11 @@ void TalkBoxReferenceEditor::buildControls()
         return t;
     };
 
-    // VOWEL - place the articulation. Drives the pad and the body controls.
-    addMacro("Vowel", "", 0, { T("padX", 1.0f), T("padY", 1.0f) }, 0);
+    // AIR - the breathy/nasal quality and how much top end the horn lets out.
+    // The vowel itself lives on the pad; a macro that swept X and Y together
+    // would duplicate it without ever selecting a vowel.
+    addMacro("Air", "", 0, { T("nasal", 1.0f), T("hornCut", 0.8f),
+                             T("proxBoost", 0.5f) }, 0);
 
     // OPEN - how far the mouth is open: aperture, jaw follow it.
     addMacro("Open", "", 0, { T("mouthOpening", 1.0f), T("jaw", 0.6f) }, 0);
@@ -478,6 +481,10 @@ void TalkBoxReferenceEditor::drawTabBar(juce::Graphics& g, juce::Rectangle<int> 
 
 void TalkBoxReferenceEditor::timerCallback()
 {
+    if (auto* b = bll("bypass")) {
+        const bool on = b->get();   // AudioParameterBool::get() is the public accessor
+        if (bypassBtn.getToggleState() != on) bypassBtn.setToggleState(on, juce::dontSendNotification);
+    }
     if (currentTab == 0 || currentTab == 1) pad.repaint();
     repaint(getLocalBounds().removeFromBottom(20));
 }

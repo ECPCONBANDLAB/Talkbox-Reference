@@ -93,6 +93,7 @@ public:
         set(apvts, "driverComp",   uni(10.0f, 55.0f));
         set(apvts, "diaphragmAsym", uni(-25.0f, 25.0f));
         set(apvts, "hornCut",      uni(5000.0f, 8500.0f));
+        set(apvts, "proxBoost",    uni(0.0f, 45.0f));
         set(apvts, "hoseLength",   uni(1.20f, 2.10f));
         set(apvts, "hoseDamping",  uni(15.0f, 60.0f));
         set(apvts, "ambience",     uni(0.0f, 35.0f));
