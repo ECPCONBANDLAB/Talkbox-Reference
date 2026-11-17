@@ -85,9 +85,18 @@ jobs:
       - name: Compile the installer
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
-          ISCC packaging\TalkBoxReference.iss | Tee-Object -FilePath iscc.log
-          if ($LASTEXITCODE -ne 0) { exit 1 }
+          # ISCC output is teed and echoed as annotations: the raw Actions log
+          # lives on Azure Blob and is not always retrievable from a client.
+          $out = & ISCC packaging\TalkBoxReference.iss 2>&1
+          $code = $LASTEXITCODE
+          $out | Tee-Object -FilePath iscc.log
+          if ($code -ne 0) {
+            Write-Host "::error::ISCC exited with code $code"
+            $out | Where-Object { $_ -match 'Error|error|not found|Cannot|Missing' } |
+              Select-Object -First 20 |
+              ForEach-Object { Write-Host "::error::$_" }
+            exit 1
+          }
           Get-ChildItem packaging\*.exe | Format-Table Name, Length
 
       - name: Checksum the installer
