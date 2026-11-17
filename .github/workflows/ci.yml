@@ -6,6 +6,10 @@ on:
   pull_request:
 
 jobs:
+  # ---------------------------------------------------------------------------
+  # The DSP engine has no dependencies, so it is tested directly with g++.
+  # This is the suite behind the "40/40 PASS" claim.
+  # ---------------------------------------------------------------------------
   dsp-tests:
     runs-on: ubuntu-latest
     steps:
@@ -13,7 +17,8 @@ jobs:
       - name: Build & run headless DSP tests
         run: |
           g++ -std=c++20 -O2 -Wall -Wextra -I src/dsp tests/test_main.cpp -o tests/run_tests
-          ./tests/run_tests
+          ./tests/run_tests | tee /tmp/test_output.txt
+          grep -q "Summary: PASS=40 FAIL=0" /tmp/test_output.txt
       - name: Upload test output
         if: always()
         run: ./tests/run_tests > artifacts/test_output.txt 2>&1 || true
@@ -32,3 +37,42 @@ jobs:
         run: cmake --build build --config Release
       - name: CTest
         run: ctest --test-dir build --output-on-failure
+
+  # ---------------------------------------------------------------------------
+  # Compiles the JUCE plugin. Before this job existed, CMakeLists.txt passed a
+  # non-existent CLAP format and the editor/processor called JUCE APIs that do
+  # not exist in 7.0.12 (AudioProcessorValueTreeState::Layout, MouseInput,
+  # Graphics::drawArc, AudioChannelLayout, ...). None of that was caught because
+  # the only build job used -DTB_BUILD_JUCE=OFF, so src/plugin/ was never
+  # compiled. This job exists so it can never regress silently again.
+  # ---------------------------------------------------------------------------
+  plugin-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install JUCE's Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libasound2-dev libx11-dev libxrandr-dev libxinerama-dev \
+            libxcursor-dev libfreetype6-dev libcurl4-openssl-dev \
+            libwebkit2gtk-4.1-dev pkg-config
+
+      - name: Pin JUCE 7.0.12
+        run: git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE third_party/JUCE
+
+      - name: Configure with JUCE
+        run: >
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          -DTB_BUILD_JUCE=ON -DJUCE_PATH=third_party/JUCE
+
+      - name: Build VST3 and Standalone
+        run: cmake --build build --config Release --parallel 2
+
+      - name: Confirm the expected artifacts exist
+        run: |
+          set -e
+          test -d "build/TalkBoxReference_artefacts/Release/VST3/TalkBox Reference.vst3"
+          test -e "build/TalkBoxReference_artefacts/Release/Standalone/TalkBox Reference"
+          echo "VST3 and Standalone built."

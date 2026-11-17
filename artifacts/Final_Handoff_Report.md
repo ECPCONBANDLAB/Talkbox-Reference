@@ -18,7 +18,7 @@ Control: Pad (articulatory IDW over 9 vowels) OR Live Mic (16 kHz LPC → LAR �
 ```
 
 - `src/dsp/` — dependency-free C++20, zero alloc/locks on audio thread, FTZ/DAZ, NaN-safe.
-- `src/plugin/` — JUCE AudioProcessor (VST3/AU/CLAP/Standalone, sidechain + L-R split + standalone mic).
+- `src/plugin/` — JUCE AudioProcessor (VST3/AU/Standalone, sidechain + L-R split).
 - `src/ui/` — vector GUI (Vowel Pad, Simple/Advanced, 30 Hz visualizer, 0% when closed).
 
 ## 2. Verified citations (web-retrieved, no invented URLs)

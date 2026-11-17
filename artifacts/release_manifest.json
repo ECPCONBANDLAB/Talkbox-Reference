@@ -2,9 +2,17 @@
   "project": "TalkBox Reference",
   "version": "1.0.0",
   "date": "2026-11-17",
-  "formats": ["VST3", "AU", "CLAP", "Standalone"],
-  "os": ["Windows", "macOS (Universal)", "Linux"],
-  "aax": "skipped (Avid SDK licensing — see docs/07)",
+  "formats": [
+    "VST3",
+    "AU (macOS only)",
+    "Standalone"
+  ],
+  "os": [
+    "Windows",
+    "macOS (Universal)",
+    "Linux"
+  ],
+  "aax": "skipped (Avid SDK licensing - see docs/07)",
   "dsp": {
     "tests": "40 PASS / 0 FAIL",
     "formants_engine": "F1 <=2.3%, F2 <=1.4%, F3 <=1.6% (9 vowels, VTL=1.0)",
@@ -19,13 +27,21 @@
     }
   },
   "files": {
-    "docs": ["docs/01_Research_and_Physics_Report.md", "docs/02_DSP_and_Accuracy_Specification.md", "docs/03_GUI_and_UX_Specification.md", "docs/04_Performance_and_CPU_Specification.md", "docs/05_Test_and_Validation_Report.md", "docs/06_User_Manual.md", "docs/07_Install_and_Uninstall_Guide.md"],
+    "docs": [
+      "docs/01_Research_and_Physics_Report.md",
+      "docs/02_DSP_and_Accuracy_Specification.md",
+      "docs/03_GUI_and_UX_Specification.md",
+      "docs/04_Performance_and_CPU_Specification.md",
+      "docs/05_Test_and_Validation_Report.md",
+      "docs/06_User_Manual.md",
+      "docs/07_Install_and_Uninstall_Guide.md"
+    ],
     "test_output": "artifacts/test_output.txt",
     "checksums": "artifacts/SHA256SUMS.txt",
     "handoff": "artifacts/Final_Handoff_Report.md"
   },
   "cloud": {
-    "github": "pending (create repo TalkBox-Reference, push, tag v1.0.0, attach binaries + SHA256SUMS.txt) — no GitHub connector in this workspace; local repo is complete and push-ready",
+    "github": "published: tag v1.0.0 and release at https://github.com/ECPCONBANDLAB/Talkbox-Reference/releases/tag/v1.0.0 (source, docs, presets, test report - no binaries)",
     "google_drive": {
       "handoff": "https://drive.google.com/file/d/1Lfxm7JFFTPbIRwnzNP7G9v9CnLXz_ljj/view?usp=drivesdk",
       "test_output": "https://drive.google.com/file/d/1R37LjLohGGAqCUFW4FzOyPgxSRf2kGYR/view?usp=drivesdk",
@@ -41,5 +57,13 @@
       "06_manual": "https://docs.google.com/document/d/1XbpyC1zKSBcmJ4bvNEBaMHIo3xUKl7acvKXcBnO1OfI/edit?usp=drivesdk",
       "07_install": "https://docs.google.com/document/d/1DCjChxZTgnykT_OAQSQiEaorVEfdHisSXEXuxFqXzT4/edit?usp=drivesdk"
     }
+  },
+  "clap": "not built (JUCE 7.0.12 has no CLAP wrapper - see docs/07 section 1)",
+  "binaries": "none in v1.0.0: source, docs and presets only. Building requires JUCE 7.0.12 and distributing binaries requires GPLv3 or a commercial JUCE licence (see LICENSE-NOTES.md)",
+  "build": {
+    "dsp_tests": "g++ -std=c++20 -O2 -I src/dsp tests/test_main.cpp -o tests/run_tests",
+    "plugin": "cmake -B build -DTB_BUILD_JUCE=ON -DJUCE_PATH=<juce-7.0.12>",
+    "artefacts": "build/TalkBoxReference_artefacts/Release/<Format>/",
+    "juce_version": "7.0.12"
   }
 }

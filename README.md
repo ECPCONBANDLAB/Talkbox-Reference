@@ -32,13 +32,17 @@ cmake -B build -DTB_BUILD_JUCE=ON -DJUCE_PATH=/path/to/JUCE
 cmake --build build --config Release
 ```
 
-Formats: 64-bit **VST3, AU (macOS), CLAP, Standalone**. Windows / macOS (Universal) / Linux. AAX skipped (Avid SDK licensing — see `docs/07`).
+Formats: 64-bit **VST3, AU (macOS), Standalone**. Windows / macOS (Universal) / Linux. No CLAP build (JUCE 7.0.12 has no CLAP wrapper) and no AAX (Avid SDK licensing) — see `docs/07`.
+
+## No installers in v1.0.0
+
+**There is no `Setup.exe`, `.dmg`, `.pkg` or portable ZIP.** The release ships source, docs and presets. That is deliberate: `src/plugin/` links JUCE 7.0.12, which is GPLv3-or-commercial, so publishing binaries would require GPLv3 terms (this repo is MIT) — and there is no code signing. Build from source with the two commands above; details in `docs/07` §0–1. See `LICENSE-NOTES.md`.
 
 ## Repository
 
 ```
 src/dsp/       dependency-free C++20 engine (headless-testable)
-src/plugin/    JUCE AudioProcessor (VST3/AU/CLAP/Standalone glue)
+src/plugin/    JUCE AudioProcessor (VST3/AU/Standalone glue)
 src/ui/        vector GUI components (Vowel Pad, knobs, visualizer)
 presets/       factory presets (Mic-Ready Funk Lead, Whisper Talkbox, ...)
 tests/         headless test + CPU benchmark suite (ctest / Catch2-ready)
@@ -69,7 +73,7 @@ MIT — see `LICENSE`. Plain-language summary in [`LICENSE-NOTES.md`](LICENSE-NO
 - `src/plugin/` builds on JUCE 7.0.12, which is dual-licensed **GPLv3 or a paid
   commercial licence**. Publishing *source* requires no JUCE licence;
   distributing *binaries* requires GPLv3 or a commercial JUCE licence.
-- VST3 and CLAP are both MIT-licensed, so neither format imposes terms here.
+- VST3 is MIT-licensed, so the format itself imposes no terms here.
 
 ## Trademark note
 

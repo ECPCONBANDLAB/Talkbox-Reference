@@ -29,11 +29,11 @@ add_test(NAME tb_tests COMMAND tb_tests)
 
 # ---------------------------------------------------------------------------
 # JUCE plugin (optional: requires JUCE 7+ via FetchContent or local path)
-# Set -DTB_BUILD_JUCE=ON and -DJUCE_PATH=/path/to/JUCE to build VST3/AU/CLAP.
+# Set -DTB_BUILD_JUCE=ON and -DJUCE_PATH=/path/to/JUCE to build VST3/AU/Standalone.
 # Default OFF so headless CI (DSP-only) builds without JUCE download.
+# JUCE 7.0.12 has no CLAP wrapper; see the formats note inside the block below.
 # ---------------------------------------------------------------------------
-option(TB_BUILD_JUCE "Build JUCE plugin (VST3/AU/CLAP/Standalone)" OFF)
-option(TB_BUILD_STANDALONE "Also build Standalone app" ON)
+option(TB_BUILD_JUCE "Build JUCE plugin (VST3/AU/Standalone)" OFF)
 
 if(TB_BUILD_JUCE)
   # JUCE must be provided via JUCE_PATH or fetched (offline-friendly: prefer local)
@@ -47,26 +47,30 @@ if(TB_BUILD_JUCE)
     FetchContent_MakeAvailable(JUCE)
   endif()
 
+  # -------------------------------------------------------------------------
+  # Formats. JUCE 7.0.12 has wrappers for VST3, AU, LV2, Standalone, Unity,
+  # AAX and ARA — it has no CLAP wrapper (no juce_audio_plugin_client/CLAP
+  # directory, no CLAP entry in _juce_get_platform_plugin_kinds). Requesting
+  # CLAP here is silently ignored, which is why this comment exists: CLAP
+  # output would need a third-party wrapper, not a flag.
+  # AU is macOS-only and is dropped automatically on other platforms.
+  # -------------------------------------------------------------------------
+  set(TB_PLUGIN_FORMATS VST3 AU Standalone)
+
   juce_add_plugin(TalkBoxReference
     VERSION ${PROJECT_VERSION}
-    DESCRIPTION "Physically accurate hardware talkbox emulation — mic-playable, ultra-low CPU"
-    MANUFACTURER "TalkBox Reference"
-    NAME "TalkBox Reference"
+    DESCRIPTION "Physically accurate hardware talkbox emulation - mic-playable, ultra-low CPU"
+    COMPANY_NAME "TalkBox Reference"
     PLUGIN_MANUFACTURER_CODE TbxR
     PLUGIN_CODE Tbx1
-    FORMATS VST3 AU CLAP Standalone
-    VST3_CATEGORIES "Fx Modulation"
-    AU_MAIN_BUS_LAYOUTS "stereo"
-    VST3_MAIN_BUS_LAYOUTS "stereo"
-    CLAP_MAIN_BUS_LAYOUTS "stereo"
-    STANDALONE_MAIN_BUS_LAYOUTS "stereo"
+    PLUGIN_NAME "TalkBox Reference"
+    FORMATS ${TB_PLUGIN_FORMATS}
+    VST3_CATEGORIES Fx
     NEEDS_MIDI_INPUT TRUE
     NEEDS_MIDI_OUTPUT FALSE
     IS_SYNTH TRUE
-    IS_TRACKS_PLUGIN FALSE
-    # Sidechain: VST3/AU/CLAP sidechain bus for mic control (see PluginProcessor)
-    # JUCE 7 supports sidechain via AudioProcessor::getBusLayout + sidechain in processBlock.
-    # Standalone uses direct mic input instead.
+    # Sidechain for mic control: bus 1 (mono input) is the talkbox mic.
+    # Standalone feeds the mic through its own audio input instead.
     )
 
   juce_generate_juce_header(${PROJECT_NAME})
@@ -78,12 +82,20 @@ if(TB_BUILD_JUCE)
   target_include_directories(${PROJECT_NAME} PRIVATE src/dsp src/plugin src/ui)
   target_compile_definitions(${PROJECT_NAME} PUBLIC
     JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0)
-  juce_add_binary_data(${PROJECT_NAME} SOURCES presets/factory_presets.json)
-  juce_add_module(${PROJECT_NAME} juce_audio_utils)
+
+  # Factory presets embedded as BinaryData so the plugin is self-contained.
+  # NOTE: juce_add_binary_data() creates its OWN target (<name>) and the header
+  # it generates must be #included by hand — it is NOT attached to the plugin
+  # target automatically. Do not pass ${PROJECT_NAME} as the target name here:
+  # juce_add_plugin() already called add_library(PROJECT_NAME STATIC), and a
+  # second add_library() with the same name is a hard CMake error.
+  # The preset browser UI is still a placeholder, so nothing reads this data yet.
+  juce_add_binary_data(TalkBoxReferenceBinaryData SOURCES presets/factory_presets.json)
+  target_link_libraries(${PROJECT_NAME} PRIVATE TalkBoxReferenceBinaryData)
+
   target_link_libraries(${PROJECT_NAME} PRIVATE
     juce::juce_audio_utils
     juce::juce_dsp)
-  juce_add_plugin(${PROJECT_NAME} TARGETS)
 endif()
 
 # ---------------------------------------------------------------------------

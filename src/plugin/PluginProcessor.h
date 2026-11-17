@@ -1,9 +1,10 @@
-// TalkBox Reference — JUCE AudioProcessor (VST3/AU/CLAP/Standalone)
+// TalkBox Reference — JUCE AudioProcessor (VST3/AU/Standalone)
 // Wraps dependency-free tb::TalkboxEngine. Zero alloc on audio thread.
-// Routing: Sidechain (bus 1 = mic) OR L-R Split (R = mic) OR Standalone mic.
+// Routing: Sidechain (bus 1 = mic) OR L-R Split (R = mic).
 // All DSP in src/dsp/ (headless-testable); this file is thin glue + APVTS.
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <vector>
 #include "../dsp/TbEngine.h"
 
 class TalkBoxReferenceProcessor : public juce::AudioProcessor {
@@ -12,8 +13,8 @@ public:
     ~TalkBoxReferenceProcessor() override = default;
 
     const juce::String getName() const override { return "TalkBox Reference"; }
-    bool acceptsMidiInput() const override { return true; }
-    bool producesMidiOutput() const override { return false; }
+    bool acceptsMidi() const override { return true; }
+    bool producesMidi() const override { return false; }
     bool isMidiEffect() const override { return false; }
     double getTailLengthSeconds() const override { return 0.0; }
     int getNumPrograms() override { return 1; }
@@ -39,9 +40,14 @@ public:
     std::atomic<float> visF[5];
     std::atomic<float> visMouth{0.8f}, visGate{0.f}, visSib{0.f};
 
-    static juce::AudioProcessorValueTreeState::Layout createLayout();
+    static juce::AudioProcessorValueTreeState::ParameterLayout createLayout();
 
 private:
     void syncParams();
+    void ensureScratch(int numSamples);
+
+    // Preallocated audio-thread scratch (no allocation in processBlock)
+    std::vector<float> micScratch, carrierMono, outL, outR;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TalkBoxReferenceProcessor)
 };
