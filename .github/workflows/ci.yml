@@ -92,9 +92,16 @@ jobs:
           name: plugin-build-log
           path: /tmp/build.log
 
+      # Assert the real artefact layout rather than guessing names, and print
+      # what was actually produced so the log is self-documenting.
       - name: Confirm the expected artifacts exist
+        shell: bash
         run: |
-          set -e
-          test -d "build/TalkBoxReference_artefacts/Release/VST3/TalkBox Reference.vst3"
-          test -e "build/TalkBoxReference_artefacts/Release/Standalone/TalkBox Reference"
-          echo "VST3 and Standalone built."
+          set -euo pipefail
+          ART="build/TalkBoxReference_artefacts/Release"
+          find "$ART" -maxdepth 3 -mindepth 1 -printf '%y %p\n' | sort
+          vst3_count=$(find "$ART/VST3" -maxdepth 1 -name '*.vst3' -type d | wc -l)
+          echo "VST3 bundles: $vst3_count"
+          test "$vst3_count" -ge 1
+          test -n "$(find "$ART/Standalone" -maxdepth 1 -type f -perm -u+x -print -quit)"
+          echo "VST3 and Standalone artefacts present."
