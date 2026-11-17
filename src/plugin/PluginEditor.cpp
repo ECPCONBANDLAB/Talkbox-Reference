@@ -194,19 +194,35 @@ void TalkBoxReferenceEditor::resized()
     content.removeFromLeft(12);
     bodyArea = content;
 
-    // Column-flow layout: each tab declares how many knobs per row.
-    const int perRow = simple ? 4 : 5;
-    const int rowH = simple ? 116 : 104;
-    const int knobW = juce::jmax(64, bodyArea.getWidth() / perRow - 10);
-
-    int i = 0;
+    // Column-flow layout. The number of columns is chosen from the actual
+    // control count on this tab so no control can ever fall off the bottom.
+    int knobsOnTab = 0, extrasOnTab = 0;
     for (auto& k : knobs) {
-        const bool onTab = (i < (int)tabbed.size()) ? false : false;
-        (void)onTab;
-        ++i;
+        for (auto& [comp, t] : tabbed)
+            if (comp == k.knob.get() && t == currentTab) { ++knobsOnTab; break; }
+    }
+    for (auto& [comp, t] : tabbed) {
+        if (t != currentTab) continue;
+        if (dynamic_cast<Segmented*>(comp) || dynamic_cast<Toggle*>(comp)) ++extrasOnTab;
     }
 
-    // Lay out only the knobs that belong to the current tab.
+    // Use the horizontal room we have: aim for a knob at least 96 px wide so the
+    // value readout never collides with its neighbour, then take as many
+    // columns as the width allows and only fall back to fewer rows if the
+    // resulting stack is still too tall.
+    const int extraH = extrasOnTab > 0 ? 34 : 0;
+    const int usableH = juce::jmax(80, bodyArea.getHeight() - extraH);
+    const int colsByWidth = juce::jmax(1, bodyArea.getWidth() / 96);
+    int perRow = juce::jmin(colsByWidth, juce::jmax(1, knobsOnTab));
+    int rowsNeeded = (knobsOnTab + perRow - 1) / juce::jmax(1, perRow);
+    // If that many rows would not fit, widen first, then shrink the row height.
+    while (rowsNeeded * 96 > usableH && perRow < colsByWidth) {
+        ++perRow;
+        rowsNeeded = (knobsOnTab + perRow - 1) / juce::jmax(1, perRow);
+    }
+    const int rowH = juce::jmax(84, juce::jmin(124, usableH / juce::jmax(1, rowsNeeded)));
+    const int knobW = juce::jmax(60, bodyArea.getWidth() / juce::jmax(1, perRow) - 8);
+
     int slot = 0;
     for (size_t n = 0; n < knobs.size(); ++n) {
         auto& k = knobs[n];
@@ -222,7 +238,9 @@ void TalkBoxReferenceEditor::resized()
     }
 
     // Choices and toggles flow underneath the knobs, full width.
-    int extraY = bodyArea.getY() + ((slot + perRow - 1) / perRow) * rowH + 6;
+    const int usedRows = juce::jmax(1, (slot + perRow - 1) / perRow);
+    int extraY = juce::jmin(bodyArea.getY() + usedRows * rowH + 4,
+                            bodyArea.getBottom() - 30);
     int segIdx = 0, togIdx = 0;
     for (auto& [comp, tab] : tabbed) {
         if (comp == &pad) continue;
