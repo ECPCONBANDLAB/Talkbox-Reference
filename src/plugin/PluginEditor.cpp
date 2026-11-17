@@ -273,7 +273,11 @@ void TalkBoxReferenceEditor::resized()
         const int selectorStrip = 34;
         const int cols = 3;
         const int cellW = macroArea.getWidth() / (cols + 1);
-        const int cellH = juce::jmax(96, (macroArea.getHeight() - selectorStrip) / 2 - 6);
+        // Cap the cell height: at large window sizes an uncapped cell stretches
+        // the dials into vast empty circles, which looks broken rather than
+        // generous. 210 px is the point where a macro ring still reads as a
+        // control and the block stays balanced.
+        const int cellH = juce::jlimit(96, 210, (macroArea.getHeight() - selectorStrip) / 2 - 6);
         for (int i = 0; i < (int)macros.size(); ++i) {
             const int c = i % cols, r = i / cols;
             macros[(size_t)i]->setBounds(macroArea.getX() + c * cellW + 6,
@@ -285,7 +289,10 @@ void TalkBoxReferenceEditor::resized()
                                 macroArea.getY() + 6, cellW - 20, cellH - 12);
 
         // Choices along the bottom of the macro block, clamped inside the panel.
-        const int y = juce::jmin(macroArea.getY() + 2 * cellH + 4,
+        // Push the selector strip to the bottom of the panel so a tall window
+        // does not leave a gap under the macros.
+        const int y = juce::jmin(juce::jmax(macroArea.getY() + 2 * cellH + 4,
+                                            macroArea.getBottom() - 30),
                                  macroArea.getBottom() - 28);
         int x = macroArea.getX();
         for (auto& [comp, tab] : tabbed) {
@@ -320,16 +327,21 @@ void TalkBoxReferenceEditor::resized()
         const int rowH = juce::jmax(84, juce::jmin(124, usableH / juce::jmax(1, rowsNeeded)));
         const int knobW = juce::jmax(60, macroArea.getWidth() / juce::jmax(1, perRow) - 8);
 
+        // Centre the grid vertically in whatever space is left, rather than
+        // pinning it to the top and leaving a hole at the bottom on a tall
+        // window.
+        const int gridRows = juce::jmax(1, (knobsOnTab + perRow - 1) / perRow);
+        const int gridTop = macroArea.getY() + juce::jmax(0, (usableH - gridRows * rowH) / 2);
         int slot = 0;
         for (size_t i = 0; i < knobs.size(); ++i) {
             if (knobTabs[i] != currentTab) continue;
             const int c = slot % perRow, r = slot / perRow;
             knobs[i]->setBounds(macroArea.getX() + c * (macroArea.getWidth() / perRow) + 4,
-                                macroArea.getY() + r * rowH, knobW, rowH - 8);
+                                gridTop + r * rowH, knobW, rowH - 8);
             ++slot;
         }
 
-        const int usedRows = juce::jmax(1, (slot + perRow - 1) / perRow);
+        const int usedRows = gridRows;
         const int extraY = juce::jmin(macroArea.getY() + usedRows * rowH + 4,
                                       macroArea.getBottom() - 30);
         int segIdx = 0;
