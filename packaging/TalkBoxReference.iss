@@ -20,7 +20,9 @@
 #define MyAppName "TalkBox Reference"
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "TalkBox Reference"
-#define BuildDir "build\TalkBoxReference_artefacts\Release"
+; Paths in this script are relative to this file (packaging\), so the
+; repo-root items are reached with ..\
+#define BuildDir "..\build\TalkBoxReference_artefacts\Release"
 
 [Setup]
 AppId={{8F3A2B1C-4D5E-4F6A-9B8C-7D6E5F4A3B2C}
@@ -34,7 +36,7 @@ OutputBaseFilename=TalkBoxReference-Setup-{#MyAppVersion}
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
-LicenseFile=COPYING-GPL-3.0.txt
+LicenseFile=..\COPYING-GPL-3.0.txt
 ArchitecturesInstallIn64BitMode=x64compatible
 
 [Languages]
@@ -45,9 +47,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Source: "{#BuildDir}\VST3\*.vst3\*"; DestDir: "{autopf}\Common Files\VST3\{#MyAppName}.vst3"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Standalone app + its dependencies, into its own program folder
 Source: "{#BuildDir}\Standalone\*"; DestDir: "{autopf}\{#MyAppName}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "presets\factory_presets.json"; DestDir: "{autopf}\{#MyAppName}\presets"; Flags: ignoreversion
-Source: "COPYING-GPL-3.0.txt"; DestDir: "{autopf}\{#MyAppName}"; Flags: ignoreversion
-Source: "LICENSE"; DestDir: "{autopf}\{#MyAppName}"; DestName: "LICENSE-MIT.txt"; Flags: ignoreversion
+Source: "..\presets\factory_presets.json"; DestDir: "{autopf}\{#MyAppName}\presets"; Flags: ignoreversion
+Source: "..\COPYING-GPL-3.0.txt"; DestDir: "{autopf}\{#MyAppName}"; Flags: ignoreversion
+Source: "..\LICENSE"; DestDir: "{autopf}\{#MyAppName}"; DestName: "LICENSE-MIT.txt"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{autopf}\{#MyAppName}\TalkBoxReference.exe"
