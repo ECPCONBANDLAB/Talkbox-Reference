@@ -22,10 +22,10 @@ void VowelPad::paint(juce::Graphics& g) {
     // Vowel anchors (labels)
     g.setColour(juce::Colours::grey);
     g.setFont(10.0f);
-    for (const auto& v : tb::kVowels) {
-        const float x = b.getX() + v.x * b.getWidth();
-        const float y = b.getY() + (1.0f - v.y) * b.getHeight();
-        g.drawText(juce::String(v.name), juce::Rectangle<float>(x - 10.0f, y - 6.0f, 20.0f, 12.0f),
+    for (int i = 0; i < 9; ++i) {
+        const float x = b.getX() + tb::kVowelPadXY[i][0] * b.getWidth();
+        const float y = b.getY() + (1.0f - tb::kVowelPadXY[i][1]) * b.getHeight();
+        g.drawText(juce::String(tb::kVowels[i].name), juce::Rectangle<float>(x - 10.0f, y - 6.0f, 20.0f, 12.0f),
                    juce::Justification::centred);
     }
 
