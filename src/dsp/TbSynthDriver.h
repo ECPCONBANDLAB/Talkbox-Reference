@@ -75,7 +75,9 @@ struct TalkboxSynth {
     int heldVel[8] = {};
     int numHeld = 0;
 
-    static constexpr float midiToHz(float n) noexcept {
+    // Not constexpr: std::pow is not a constant expression in the MSVC standard
+    // library, and this only ever runs at audio rate.
+    static float midiToHz(float n) noexcept {
         return 440.0f * std::pow(2.0f, (n - 69.0f) / 12.0f);
     }
 
