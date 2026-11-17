@@ -31,7 +31,6 @@ AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\TalkBox Reference
 DefaultGroupName=TalkBox Reference
-DisableProgramIcons=yes
 OutputBaseFilename=TalkBoxReference-Setup-{#MyAppVersion}
 Compression=lzma2/max
 SolidCompression=yes
@@ -44,7 +43,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 ; VST3 bundle -> the shared VST3 folder so every DAW sees it
-Source: "{#BuildDir}\VST3\*.vst3\*"; DestDir: "{autopf}\Common Files\VST3\{#MyAppName}.vst3"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#BuildDir}\VST3\TalkBoxReference.vst3\*"; DestDir: "{autopf}\Common Files\VST3\TalkBoxReference.vst3"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Standalone app + its dependencies, into its own program folder
 Source: "{#BuildDir}\Standalone\*"; DestDir: "{autopf}\{#MyAppName}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\presets\factory_presets.json"; DestDir: "{autopf}\{#MyAppName}\presets"; Flags: ignoreversion
