@@ -1,0 +1,134 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to release
+        required: true
+        default: v1.0.0
+      build_binaries:
+        description: 'Also build plugin binaries with JUCE (unsigned; see notes)'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Source + docs + presets release. Always runs. v1.0.0 ships no prebuilt
+  # binaries: the plugin needs JUCE 7+ and no signing/notarisation is set up,
+  # so publishing binaries would ship unsigned artifacts. See docs/07.
+  # -------------------------------------------------------------------------
+  source-release:
+    name: Source, docs & presets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Build & run DSP tests (fails the release if red)
+        shell: bash
+        run: |
+          g++ -std=c++20 -O2 -Wall -Wextra -I src/dsp tests/test_main.cpp -o tests/run_tests
+          ./tests/run_tests | tee /tmp/test_output.txt
+          grep -q "Summary: PASS=40 FAIL=0" /tmp/test_output.txt
+
+      - name: Verify checksums
+        run: sha256sum -c artifacts/SHA256SUMS.txt
+
+      - name: Package
+        shell: bash
+        env:
+          VERSION: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          DIR="TalkBoxReference-${VERSION}"
+          mkdir -p "dist/${DIR}"
+          git archive HEAD | tar -xf - -C "dist/${DIR}"
+          cp /tmp/test_output.txt "dist/${DIR}/artifacts/test_output.txt"
+          cp /tmp/test_output.txt dist/test_output.txt
+          (cd "dist/${DIR}" && find . -type f ! -path './PACKAGE_SHA256SUMS.txt' -print0 | sort -z | xargs -0 sha256sum > PACKAGE_SHA256SUMS.txt)
+          cd dist
+          tar czf "TalkBoxReference-${VERSION}-source.tar.gz" "${DIR}"
+          zip -qr "TalkBoxReference-${VERSION}-source.zip" "${DIR}"
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          name: TalkBox Reference ${{ github.event.inputs.tag || github.ref_name }}
+          body: |
+            **TalkBox Reference ${{ github.event.inputs.tag || github.ref_name }}**
+
+            Source, documentation, presets and the validated test report.
+            All 40 DSP assertions pass (`PASS=40 FAIL=0`) and the 15 recorded
+            checksums verify.
+
+            ⚠️ **No prebuilt binaries in this release.** The JUCE targets need
+            JUCE 7+ (`cmake -B build -DTB_BUILD_JUCE=ON`) and there is no code
+            signing or notarisation configured; shipping unsigned installers
+            (SmartScreen on Windows, Gatekeeper on macOS) would be worse than
+            shipping none. Build instructions: `docs/07_Install_and_Uninstall_Guide.md`.
+
+            Signal chain: carrier → DC blocker → compression driver (ADAA) →
+            vinyl hose waveguide → vocal tract (LAR lattice + 5× TPT resonators)
+            → lip radiation + close-talk mic → consonant bridge.
+          files: |
+            dist/TalkBoxReference-*-source.tar.gz
+            dist/TalkBoxReference-*-source.zip
+            presets/factory_presets.json
+            artifacts/SHA256SUMS.txt
+            dist/test_output.txt
+
+  # -------------------------------------------------------------------------
+  # Optional: plugin binaries, triggered manually. Produces UNSIGNED
+  # VST3/CLAP/Standalone artifacts. Enable only with the maintainer's consent.
+  # -------------------------------------------------------------------------
+  binaries:
+    name: Plugin binaries (${{ matrix.os }})
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_binaries == 'true'
+    needs: source-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: Cache JUCE
+        uses: actions/cache@v4
+        with:
+          path: third_party/JUCE
+          key: juce-7.0.12-${{ matrix.os }}
+
+      - name: Fetch JUCE 7.0.12
+        run: |
+          git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE third_party/JUCE || true
+
+      - name: Configure with JUCE
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DTB_BUILD_JUCE=ON -DJUCE_PATH=third_party/JUCE
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Package
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp -r build/TalkBoxReference_artefacts/Release/* dist/ 2>/dev/null || true
+          cd dist && sha256sum $(find . -type f | sort) > SHA256SUMS.txt
+
+      - name: Upload binaries
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          files: dist/**

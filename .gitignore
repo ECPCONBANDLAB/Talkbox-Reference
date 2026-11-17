@@ -1,0 +1,52 @@
+# Build outputs
+build/
+build-*/
+out/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.pdb
+
+# Test binaries
+tests/run_tests
+tests/run_tests.exe
+
+# JUCE (fetched or vendored by the maintainer)
+JUCE/
+modules/
+Builds/
+JuceLibraryCode/
+
+# Packages / installers
+*.pkg
+*.dmg
+*.vst3/
+*.component/
+*.clap/
+Output/
+
+# Local-only artifacts (never commit binaries)
+artifacts/*.zip
+artifacts/*.tar.gz
+artifacts/*.bundle
+artifacts/*.wav
+PortableData/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Credentials — NEVER commit tokens
+.env
+*.token
+tools/.github_token

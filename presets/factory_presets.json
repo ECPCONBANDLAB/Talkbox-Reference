@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "presets": [
+    {
+      "name": "Mic-Ready Funk Lead",
+      "tags": ["funk", "lead", "mic", "live"],
+      "params": {
+        "sourceMode": 1, "carrierMode": 1, "quality": 1,
+        "carrierDrive": 0.65, "tubeCharacter": 0.55, "vtl": 1.0, "glide": 0.45,
+        "consonantCrisp": 0.75, "micProximity": 0.5, "dryWet": 1.0, "outputGain": 1.0,
+        "micPreGain": 1.2, "gateThresh": 0.008, "gateBehavior": 0, "whisperBoost": 1.0,
+        "sibilDeess": 0.3, "voiceBleed": 0.0, "micSmooth": 0.6,
+        "synthWave": 0, "synthGlide": 0.06, "synthVibrato": 0.1,
+        "driverComp": 0.3, "diaphragmAsym": 0.05, "hornCut": 6500,
+        "hoseLength": 1.75, "hoseDamping": 0.3, "micModel": 0, "micDistance": 3.0, "proxBoost": 0.5
+      }
+    },
+    {
+      "name": "Whisper Talkbox",
+      "tags": ["whisper", "talk", "intelligible", "mic"],
+      "params": {
+        "sourceMode": 1, "carrierMode": 1, "quality": 1,
+        "carrierDrive": 0.55, "tubeCharacter": 0.5, "vtl": 1.0, "glide": 0.55,
+        "consonantCrisp": 0.85, "micProximity": 0.6, "dryWet": 1.0, "outputGain": 1.0,
+        "micPreGain": 1.5, "gateThresh": 0.004, "gateBehavior": 0, "whisperBoost": 1.8,
+        "sibilDeess": 0.25, "voiceBleed": 0.0, "micSmooth": 0.5,
+        "synthWave": 0, "synthGlide": 0.04, "synthVibrato": 0.0,
+        "driverComp": 0.25, "diaphragmAsym": 0.0, "hornCut": 6800,
+        "hoseLength": 1.75, "hoseDamping": 0.3, "micModel": 1, "micDistance": 5.0, "proxBoost": 0.4
+      }
+    },
+    {
+      "name": "Classic Guitar Hose",
+      "tags": ["guitar", "classic", "pad", "rock"],
+      "params": {
+        "sourceMode": 0, "carrierMode": 0, "quality": 1,
+        "carrierDrive": 0.6, "tubeCharacter": 0.6, "vtl": 1.0, "glide": 0.5,
+        "consonantCrisp": 0.0, "micProximity": 0.5, "dryWet": 1.0, "outputGain": 1.0,
+        "padX": 0.5, "padY": 0.45, "jaw": 0.45, "tongueX": 0.5, "tongueHeight": 0.45,
+        "lipRounding": 0.0, "mouthOpening": 0.8, "nasal": 0.0,
+        "driverComp": 0.35, "diaphragmAsym": 0.1, "hornCut": 6200,
+        "hoseLength": 1.9, "hoseDamping": 0.35, "micModel": 0, "micDistance": 3.0, "proxBoost": 0.55
+      }
+    },
+    {
+      "name": "Pad Vowel Morphs",
+      "tags": ["pad", "morph", "vowel", "experimental"],
+      "params": {
+        "sourceMode": 0, "carrierMode": 1, "quality": 2,
+        "carrierDrive": 0.5, "tubeCharacter": 0.5, "vtl": 0.95, "glide": 0.35,
+        "consonantCrisp": 0.0, "micProximity": 0.5, "dryWet": 1.0, "outputGain": 1.0,
+        "padX": 0.95, "padY": 0.10, "jaw": 0.10, "tongueX": 0.95, "tongueHeight": 0.10,
+        "lipRounding": 0.0, "mouthOpening": 0.9, "nasal": 0.0,
+        "synthWave": 1, "synthGlide": 0.08, "synthVibrato": 0.15,
+        "driverComp": 0.2, "diaphragmAsym": 0.0, "hornCut": 7000,
+        "hoseLength": 1.75, "hoseDamping": 0.25, "micModel": 3, "micDistance": 10.0, "proxBoost": 0.2
+      }
+    }
+  ]
+}
