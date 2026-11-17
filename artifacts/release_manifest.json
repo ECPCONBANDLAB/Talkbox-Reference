@@ -1,6 +1,6 @@
 {
   "project": "TalkBox Reference",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "date": "2026-11-17",
   "formats": [
     "VST3",
@@ -79,5 +79,12 @@
     "mean_error_F1_F5_pct": 0.5,
     "interpolation_mean_error_pct": 1.4,
     "calibration": "coordinate descent over the physical cascade"
+  },
+  "ui": {
+    "framework": "JUCE 7.0.12",
+    "style": "vector, DPI-independent",
+    "parameters_exposed": "44/44",
+    "tabs": 5,
+    "dead_parameters_fixed": 6
   }
 }
