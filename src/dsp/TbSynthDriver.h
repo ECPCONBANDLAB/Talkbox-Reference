@@ -61,29 +61,88 @@ struct TalkboxSynth {
     float pitchBend = 0.0f;    // semitones
     float octave = 0.0f;       // -2..+2 octaves, applied to every voice and the sub
 
+    // ---- Arpeggiated chord engine -----------------------------------------
+    // A talkbox is played with a chord in the left hand and the vowel in the
+    // mouth; the phrase has to be re-articulated or it is unintelligible. A
+    // static chord therefore cannot work. When two or more notes are held the
+    // synth steps through them at the arp rate, and every step resets the
+    // oscillator phase so the carrier is re-excited (that is the "talk").
+    // 1 note held = plain sustained note. 0 notes = silent.
+    float arpRate = 8.0f;      // steps per second
+    float arpPhase = 0.0f;
+    int arpStep = 0;
+    int heldNotes[8] = {};     // sounding notes, in press order
+    int heldVel[8] = {};
+    int numHeld = 0;
+
+    static constexpr float midiToHz(float n) noexcept {
+        return 440.0f * std::pow(2.0f, (n - 69.0f) / 12.0f);
+    }
+
     void prepare(float sampleRate) noexcept {
         fs = sampleRate;
         for (auto& v : voices) { v.osc.prepare(fs); v.osc.waveform = waveform; }
     }
     void setWaveform(int w) noexcept { waveform = w; for (auto& v: voices) v.osc.waveform=w; }
+    // Notes are tracked as a held chord, not as independent voices: the arp
+    // needs the set, and a talkbox is monophonic by nature.
     void noteOn(float midiNote, float vel=1.0f) noexcept {
-        float f = 440.0f * std::pow(2.0f, (midiNote - 69.0f + octave*12.0f)/12.0f);
-        // steal quietest voice
-        int idx = 0; float best = 1e9f;
-        for (int i=0;i<kMaxVoices;++i) if (!voices[i].active) { idx=i; break; }
-        else if (voices[i].level < best) { best=voices[i].level; idx=i; }
-        voices[idx].targetFreq = f;
-        voices[idx].curFreq = voices[idx].active ? voices[idx].curFreq : f;
-        voices[idx].level = clampf(vel, 0.0f, 1.0f);
-        voices[idx].active = true;
-        voices[idx].osc.setFreq(f);
+        const int n = (int)std::lround(midiNote);
+        for (int i=0;i<numHeld;++i) if (heldNotes[i]==n) { heldVel[i]=(int)(vel*127.f); return; }
+        if (numHeld < 8) {
+            heldNotes[numHeld]=n; heldVel[numHeld]=(int)(vel*127.f); ++numHeld;
+        } else {
+            for (int i=1;i<8;++i){ heldNotes[i-1]=heldNotes[i]; heldVel[i-1]=heldVel[i]; }
+            heldNotes[7]=n; heldVel[7]=(int)(vel*127.f);
+        }
+        if (numHeld == 1) { arpStep = 0; arpPhase = 0.0f; retune(); }
     }
     void noteOff(float midiNote) noexcept {
-        float f = 440.0f * std::pow(2.0f, (midiNote - 69.0f + octave*12.0f)/12.0f);
-        for (auto& v : voices) if (std::fabs(v.targetFreq - f) < 1.0f) v.active=false;
+        const int n = (int)std::lround(midiNote);
+        for (int i=0;i<numHeld;++i) {
+            if (heldNotes[i]==n) {
+                for (int j=i+1;j<numHeld;++j){ heldNotes[j-1]=heldNotes[j]; heldVel[j-1]=heldVel[j]; }
+                --numHeld;
+                if (arpStep >= numHeld) arpStep = 0;
+                retune();
+                return;
+            }
+        }
     }
-    void allNotesOff() noexcept { for (auto& v: voices) v.active=false; }
+    void allNotesOff() noexcept { numHeld = 0; for (auto& v: voices) v.active=false; }
+
+    // Point every voice at the current arp step. Used on note changes and on
+    // each arp step.
+    void retune() noexcept {
+        if (numHeld == 0) return;
+        const int note = heldNotes[arpStep % numHeld];
+        const float f = midiToHz((float)note);
+        for (int i=0;i<kMaxVoices;++i) {
+            voices[i].targetFreq = f;
+            if (!voices[i].active) voices[i].curFreq = f;
+        }
+        if (voices[0].level <= 0.001f) voices[0].level = (float)heldVel[arpStep % numHeld] / 127.f;
+    }
+
     inline float process() noexcept {
+        if (numHeld == 0) return 0.0f;
+
+        // Arp clock. Only steps when a chord is actually held; a single note
+        // sustains normally, which is the expected behaviour for a lead.
+        if (numHeld > 1 && arpRate > 0.01f) {
+            arpPhase += arpRate / fs;
+            if (arpPhase >= 1.0f) {
+                arpPhase -= 1.0f;
+                arpStep = (arpStep + 1) % numHeld;
+                retune();
+                // Re-excite the carrier: a phase restart gives the consonant-like
+                // attack that makes rapid vowel changes intelligible.
+                for (auto& v : voices) { v.osc.reset(); v.osc.setFreq(v.curFreq); }
+            }
+        }
+        // Keep the voices alive while the chord is held.
+        for (auto& v : voices) if (!v.active) { v.active = true; }
+
         float glideCoeff = (glideTime > 0.001f) ? std::exp(-1.0f/(glideTime*fs)) : 0.0f;
         vibratoPhase += vibratoRate/fs; if (vibratoPhase>=1.0f) vibratoPhase-=1.0f;
         float vib = std::sin(kTwoPi*vibratoPhase) * vibratoDepth; // semitones
@@ -94,9 +153,7 @@ struct TalkboxSynth {
             v.curFreq = glideCoeff*v.curFreq + (1.0f-glideCoeff)*target;
             v.osc.setFreq(v.curFreq);
             float s = v.osc.process();
-            // simple release: fade level when inactive
-            if (!v.active) { v.level *= 0.999f; if (v.level<0.001f) continue; }
-            out += s * v.level;
+            out += s * (v.level > 0.001f ? v.level : 1.0f);
             ++nActive;
         }
         if (nActive>0) out /= (float)nActive;
@@ -108,7 +165,10 @@ struct TalkboxSynth {
         }
         return sanitize(out);
     }
-    void reset() noexcept { for (auto& v: voices){v.osc.reset(); v.active=false; v.level=0.f;} subPhase=0.f; }
+    void reset() noexcept {
+        for (auto& v: voices){ v.osc.reset(); v.active=false; v.level=0.f; }
+        subPhase=0.f; arpPhase=0.f; arpStep=0; numHeld=0;
+    }
 };
 
 // ---------------------------------------------------------------------------

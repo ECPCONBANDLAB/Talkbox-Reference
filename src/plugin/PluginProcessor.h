@@ -40,6 +40,7 @@ public:
     std::atomic<float> visF[5];
     std::atomic<float> visMouth{0.8f}, visGate{0.f}, visSib{0.f};
     std::atomic<float> visRms{0.f};   // output level, drives the signal meter
+    std::atomic<bool> visGotMidi{false};  // has the host ever sent MIDI?
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createLayout();
 

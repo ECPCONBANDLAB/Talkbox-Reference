@@ -60,21 +60,23 @@ void VowelPad::paint(juce::Graphics& g)
     g.drawText("950 Hz", a.reduced(4, 0).removeFromBottom(10).toNearestInt(),
                juce::Justification::centredRight, false);
 
-    // Anchors placed from their published acoustic targets, not the pad coords:
-    // the picture then shows the vowel the model actually produces.
-    struct Ref { const char* name; float f1, f2; };
-    static const Ref refs[9] = {
-        {"i",   270, 2290}, {"ih",  390, 1990}, {"eh",  530, 1840},
-        {"ae",  660, 1720}, {"ah",  730, 1090}, {"aw",  570,  840},
-        {"oh",  440, 1020}, {"u",   300,  870}, {"uh",  500, 1500},
-    };
-    for (const auto& r : refs) {
-        auto p = toScreen(r.f1, r.f2);
+    // Anchors are drawn from the SAME table the audio uses (tb::kVowels).
+    // v1.2.0 drew them from a hand-copied second table with different names and
+    // different F1/F2 values ("i" at 270/2290 when the model actually produces
+    // 300/2240), so every label sat somewhere the sound was not. One table,
+    // one truth.
+    for (const auto& v : tb::kVowels) {
+        auto p = toScreen(v.f1, v.f2);
         g.setColour(tbui::colour::textFaint.withAlpha(0.85f));
         g.fillEllipse(p.x - 1.5f, p.y - 1.5f, 3.0f, 3.0f);
         g.setFont(tbui::labelFont(9.0f));
-        g.drawText(r.name, juce::Rectangle<float>(p.x - 12.0f, p.y + 3.0f, 24.0f, 11.0f),
-                   juce::Justification::centred, false);
+        // Draw the label clear of the dot, offset away from the nearest edge so
+        // it never runs off the plot or sits on top of the marker.
+        const auto a = plotArea();
+        const float cx = p.x < a.getCentreX() ? p.x + 4.0f : p.x - 28.0f;
+        const float cy = p.y < a.getCentreY() ? p.y - 1.0f : p.y - 10.0f;
+        g.drawText(v.name, juce::Rectangle<float>(cx, cy, 24.0f, 11.0f),
+                   juce::Justification::centredLeft, false);
     }
 
     // Current articulation. In Mic mode it tracks the live vowel.
