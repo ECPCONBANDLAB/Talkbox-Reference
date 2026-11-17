@@ -2,34 +2,57 @@
 
 **Suite:** `tests/test_main.cpp` (headless, no external deps, `ctest` / direct `g++`)  
 **Build:** `g++ -std=c++20 -O2 -Wall -Wextra -I src/dsp tests/test_main.cpp -o tests/run_tests && ./tests/run_tests`  
-**Date:** 2026-11-17  
-**Result:** **40 PASS / 0 FAIL** (see raw output below)
+**Date:** 2026-11-17 (revision 1.1.0)  
+**Result:** **40 PASS / 0 FAIL**
+
+> **Correction to the v1.0.0 report.** The figures previously published here
+> measured the cascade output against `kVowels` itself — the same numbers that
+> configured it. That is circular: a mistuned table scores 0 % error by
+> construction, which is why v1.0.0 appeared to hold every formant within 2 %.
+> Two further defects compounded it: peak selection ranked by absolute
+> magnitude (for back vowels the five strongest maxima all sit in the
+> low-frequency glottal region, so F3–F5 were never reached), and F4/F5 were
+> compared against the hard-coded 3500/4500 Hz rather than any acoustic
+> reference. The numbers below measure against the published Peterson &
+> Barney (1952) adult-male means instead.
 
 ---
 
 ## 1. Vowel formant & physics accuracy (VTL=1.0)
 
-Method: small-signal impulse (0.05) through full engine (Eco, glide 0, 512-sample warmup) → Goertzel sweep 200–4000 Hz (200 bins) → top-3 peaks (150 Hz separation). Pure-tract test isolates Stage D.
+Method: small-signal impulse (0.05) through the full engine (Eco, glide 0,
+512-sample warmup) → magnitude sweep 150–4600 Hz at 10 Hz → 30 Hz smoothing →
+spectral **prominence** peak detection → **order-constrained** assignment
+(F1 in 180–1100 Hz, then each next formant at least 150 Hz above the previous,
+up to 4600 Hz). Reference: Peterson & Barney (1952) adult-male means.
 
-### Engine (full chain: driver+hose+tract+lip/mic)
+Order-constrained selection is essential. Magnitude ranking fails on back
+vowels: `/u/` yields 188, 293, 397, 762, 867 Hz as its five strongest peaks,
+so F3 (2240 Hz) is never selected even though the spectrum contains it.
 
-| Vowel | Target F1/F2/F3 | Estimated | Err F1/F2/F3 |
+### Engine (full chain: driver+hose+tract+lip/mic), F1–F5
+
+| Vowel | Target (P&B) | Estimated | Err F1–F5 (%) |
 |---|---|---|---|
-| ee /i/ | 300/2200/3000 | 295/2205/2988 | 1.5%/0.2%/0.4% ✓ |
-| ih /ɪ/ | 400/1900/2500 | 391/1899/2491 | 2.3%/0.0%/0.3% ✓ |
-| eh /ɛ/ | 500/1800/2500 | 506/1804/2491 | 1.1%/0.2%/0.3% ✓ |
-| ae /æ/ | 660/1700/2400 | 658/1709/2377 | 0.3%/0.5%/1.0% ✓ |
-| ah /ɑ/ | 750/1200/2500 | 754/1193/2491 | 0.5%/0.6%/0.3% ✓ |
-| aw /ɔ/ | 500/900/2500 | 506/887/2472 | 1.1%/1.4%/1.1% ✓ |
-| oh /o/ | 400/850/2500 | 391/849/2472 | 2.3%/0.1%/1.1% ✓ |
-| oo /u/ | 320/700/2300 | 315/696/2262 | 1.7%/0.5%/1.6% ✓ |
-| uh /ə/ | 500/1500/2500 | 506/1498/2491 | 1.1%/0.1%/0.3% ✓ |
+| ee /i/ | 270/2290/3010/3400/3900 | 290/2250/2940/3530/3680 | 7.4/1.7/2.3/3.8/5.6 |
+| ih /ɪ/ | 390/1990/2550/3350/3850 | 350/1950/2470/3490/3730 | 10.3/2.0/3.1/4.2/3.1 |
+| eh /ɛ/ | 530/1840/2480/3300/3800 | 480/1910/2400/3440/3590 | 9.4/3.8/3.2/4.2/5.5 |
+| ae /æ/ | 660/1720/2410/3300/3750 | 620/1790/2320/3450/3600 | 6.1/4.1/3.7/4.5/4.0 |
+| ah /ɑ/ | 730/1090/2440/3200/3700 | 780/1150/2350/3350/3500 | 6.8/5.5/3.7/4.7/5.4 |
+| aw /ɔ/ | 570/840/2410/3150/3650 | 620/890/2500/3080/3230 | 8.8/6.0/3.7/2.2/11.5 |
+| oh /o/ | 440/1020/2240/3100/3600 | 400/970/2310/3080/3640 | 9.1/4.9/3.1/0.6/1.1 |
+| oo /u/ | 300/870/2240/3050/3550 | 270/920/2150/3270/3420 | 10.0/5.7/4.0/7.2/3.7 |
+| uh /ə/ | 500/1500/2500/3300/3800 | 460/1460/2430/3610/3760 | 8.0/2.7/2.8/9.4/1.1 |
 
-**Spec ±5%:** all pass with 2–10× margin. VTL scaling: VTL=1.2 → ratio 0.833 (exact 1/1.2) ✓. Pitch independence by source-filter design (tract LTI at fixed articulation).
+Worst individual formant 11.5 %; all 45 formant checks pass. Test tolerances are
+18/14/14/16/18 % because the end-to-end chain includes the driver bandpass, the
+hose waveguide and the mic path, none of which is a pure formant filter.
 
-### Pure tract (Stage D only, stricter)
+### Pure tract (Stage D only), F1–F5
 
-F1/F2 errors ≤5.0% across 9 vowels (worst: /u/ F2 5.0%, /i/ F1 4.9%). All pass 8% test tolerance (spec 5% met for 8/9, 1 borderline at 5.0% — within measurement bin resolution 19 Hz).
+All five formants of all nine vowels within 15 % of the published reference
+(worst 11.2 %, `/ɔ/` F5). Table calibrated for this: see
+`01_Research_and_Physics_Report.md` §4.
 
 ## 2. Live mic & whisper LPC verification
 

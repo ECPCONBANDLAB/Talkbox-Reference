@@ -59,6 +59,7 @@ struct TalkboxSynth {
     int waveform = 0;
     float pulseWidth = 0.5f;
     float pitchBend = 0.0f;    // semitones
+    float octave = 0.0f;       // -2..+2 octaves, applied to every voice and the sub
 
     void prepare(float sampleRate) noexcept {
         fs = sampleRate;
@@ -66,7 +67,7 @@ struct TalkboxSynth {
     }
     void setWaveform(int w) noexcept { waveform = w; for (auto& v: voices) v.osc.waveform=w; }
     void noteOn(float midiNote, float vel=1.0f) noexcept {
-        float f = 440.0f * std::pow(2.0f, (midiNote - 69.0f)/12.0f);
+        float f = 440.0f * std::pow(2.0f, (midiNote - 69.0f + octave*12.0f)/12.0f);
         // steal quietest voice
         int idx = 0; float best = 1e9f;
         for (int i=0;i<kMaxVoices;++i) if (!voices[i].active) { idx=i; break; }
@@ -78,7 +79,7 @@ struct TalkboxSynth {
         voices[idx].osc.setFreq(f);
     }
     void noteOff(float midiNote) noexcept {
-        float f = 440.0f * std::pow(2.0f, (midiNote - 69.0f)/12.0f);
+        float f = 440.0f * std::pow(2.0f, (midiNote - 69.0f + octave*12.0f)/12.0f);
         for (auto& v : voices) if (std::fabs(v.targetFreq - f) < 1.0f) v.active=false;
     }
     void allNotesOff() noexcept { for (auto& v: voices) v.active=false; }
@@ -89,7 +90,7 @@ struct TalkboxSynth {
         float out = 0.0f; int nActive=0;
         for (auto& v : voices) {
             if (!v.active && v.level < 0.001f) continue;
-            float target = v.targetFreq * std::pow(2.0f,(pitchBend+vib)/12.0f);
+            float target = v.targetFreq * std::pow(2.0f,(pitchBend+vib)/12.0f + octave);
             v.curFreq = glideCoeff*v.curFreq + (1.0f-glideCoeff)*target;
             v.osc.setFreq(v.curFreq);
             float s = v.osc.process();

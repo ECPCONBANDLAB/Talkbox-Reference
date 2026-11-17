@@ -39,6 +39,7 @@ public:
     // Lock-free visualizer taps (GUI reads; audio writes)
     std::atomic<float> visF[5];
     std::atomic<float> visMouth{0.8f}, visGate{0.f}, visSib{0.f};
+    std::atomic<float> visRms{0.f};   // output level, drives the signal meter
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createLayout();
 

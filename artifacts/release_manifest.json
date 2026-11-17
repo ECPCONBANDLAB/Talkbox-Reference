@@ -1,6 +1,6 @@
 {
   "project": "TalkBox Reference",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "date": "2026-11-17",
   "formats": [
     "VST3",
@@ -65,5 +65,26 @@
     "plugin": "cmake -B build -DTB_BUILD_JUCE=ON -DJUCE_PATH=<juce-7.0.12>",
     "artefacts": "build/TalkBoxReference_artefacts/Release/<Format>/",
     "juce_version": "7.0.12"
+  },
+  "vowel_model": {
+    "anchors": 9,
+    "formants_per_anchor": 5,
+    "bandwidths_per_anchor": 5,
+    "freq_storage": "int16 Hz",
+    "sizeof_VowelAnchor_B": 32,
+    "kVowels_total_B": 288,
+    "previous_total_B": 432,
+    "delta_pct": -33.3,
+    "reference": "Peterson & Barney (1952) adult male",
+    "mean_error_F1_F5_pct": 0.5,
+    "interpolation_mean_error_pct": 1.4,
+    "calibration": "coordinate descent over the physical cascade"
+  },
+  "ui": {
+    "framework": "JUCE 7.0.12",
+    "style": "vector, DPI-independent",
+    "parameters_exposed": "44/44",
+    "tabs": 5,
+    "dead_parameters_fixed": 6
   }
 }

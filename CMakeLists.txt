@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(TalkBoxReference VERSION 1.0.0 LANGUAGES CXX)
+project(TalkBoxReference VERSION 1.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -75,9 +75,15 @@ if(TB_BUILD_JUCE)
 
   juce_generate_juce_header(${PROJECT_NAME})
 
+  # Glob the UI sources rather than listing them: VowelPad.cpp was added as a
+  # new translation unit and a hand-maintained list silently omitted it, which
+  # only surfaced as an MSVC link error at packaging time.
+  file(GLOB TB_UI_SOURCES CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/*.cpp)
   target_sources(${PROJECT_NAME} PRIVATE
     src/plugin/PluginProcessor.cpp
     src/plugin/PluginEditor.cpp
+    ${TB_UI_SOURCES}
   )
   target_include_directories(${PROJECT_NAME} PRIVATE src/dsp src/plugin src/ui)
   target_compile_definitions(${PROJECT_NAME} PUBLIC
