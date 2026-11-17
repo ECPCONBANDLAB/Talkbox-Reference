@@ -1,0 +1,38 @@
+# Build
+build/
+cmake-build-*/
+out/
+bin/
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Test binaries
+tests/run_tests
+tests/run_tests.exe
+
+# JUCE
+external/JUCE/
+JuceLibraryCode/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Packaging output
+packaging/Output/
+*.msi
+*.dmg
+*.AppImage
+*.zip
+
+# Node / tooling leftovers
+node_modules/

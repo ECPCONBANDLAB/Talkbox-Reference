@@ -1,0 +1,103 @@
+{
+  "format": "talkbox-reference/factory-presets",
+  "version": "1.0.0",
+  "sampleRateNote": "All parameters are sample-rate independent; oversampling is local to the driver stage.",
+  "presets": [
+    {
+      "name": "Eco Pad",
+      "description": "Lowest CPU: 1x oversampling, internal saw carrier",
+      "category": "Pad",
+      "params": {
+        "vtl": 1.0,
+        "hoseLength": 1.6,
+        "hoseFeedback": 0.88,
+        "driveDb": 3.0,
+        "oversample": 1,
+        "vowel": 5,
+        "formantShift": 0.0,
+        "nasal": 0.2,
+        "lipAperture": 1.0,
+        "mic": "small-diaphragm",
+        "micDistance": 0.15,
+        "saturation": 0.1,
+        "carrierMode": "saw",
+        "carrierFreq": 110.0,
+        "carrierNoiseMix": 0.0,
+        "outputDb": -4.0,
+        "ceilingDb": -0.3
+      }
+    },
+    {
+      "name": "Mic",
+      "description": "Microphone-first: external carrier, minimal drive",
+      "category": "Utility",
+      "params": {
+        "vtl": 1.0,
+        "hoseLength": 1.75,
+        "hoseFeedback": 0.88,
+        "driveDb": 0.0,
+        "oversample": 1,
+        "vowel": 5,
+        "formantShift": 0.0,
+        "nasal": 0.12,
+        "lipAperture": 1.0,
+        "mic": "dynamic",
+        "micDistance": 0.1,
+        "saturation": 0.05,
+        "carrierMode": "external",
+        "carrierFreq": 110.0,
+        "carrierNoiseMix": 0.0,
+        "outputDb": -2.0,
+        "ceilingDb": -0.3
+      }
+    },
+    {
+      "name": "Balanced",
+      "description": "Default all-round voice: 2x oversampling, 6 dB drive",
+      "category": "Vocal",
+      "params": {
+        "vtl": 1.0,
+        "hoseLength": 1.75,
+        "hoseFeedback": 0.88,
+        "driveDb": 6.0,
+        "oversample": 2,
+        "vowel": 5,
+        "formantShift": 0.0,
+        "nasal": 0.12,
+        "lipAperture": 1.0,
+        "mic": "dynamic",
+        "micDistance": 0.15,
+        "saturation": 0.18,
+        "carrierMode": "external",
+        "carrierFreq": 110.0,
+        "carrierNoiseMix": 0.0,
+        "outputDb": -3.0,
+        "ceilingDb": -0.3
+      }
+    },
+    {
+      "name": "Studio",
+      "description": "Maximum detail: 4x oversampling, condenser, long hose",
+      "category": "Vocal",
+      "params": {
+        "vtl": 1.0,
+        "hoseLength": 1.9,
+        "hoseFeedback": 0.88,
+        "driveDb": 9.0,
+        "oversample": 4,
+        "vowel": 5,
+        "formantShift": 0.0,
+        "nasal": 0.08,
+        "lipAperture": 1.0,
+        "mic": "condenser",
+        "micDistance": 0.22,
+        "saturation": 0.25,
+        "carrierMode": "external",
+        "carrierFreq": 110.0,
+        "carrierNoiseMix": 0.0,
+        "outputDb": -4.0,
+        "ceilingDb": -0.3
+      }
+    }
+  ]
+}
